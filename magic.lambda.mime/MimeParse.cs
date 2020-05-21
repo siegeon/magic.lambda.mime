@@ -3,14 +3,13 @@
  * See the enclosed LICENSE file for details.
  */
 
-using System;
 using magic.node;
-using magic.node.extensions;
 using magic.signals.contracts;
 
 namespace magic.lambda.mime
 {
     /// <summary>
+    /// Parses a MIME message and returns its as a hierarchical object of lambda to caller.
     /// </summary>
     [Slot(Name = "mime.parse")]
     public class MimeParse : ISlot
