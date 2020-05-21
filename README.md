@@ -1,2 +1,3 @@
 # magic.lambda.mime
- The ability to parse and create MIME messages from Hyperlambda
+
+The ability to parse and create MIME messages from Hyperlambda.
