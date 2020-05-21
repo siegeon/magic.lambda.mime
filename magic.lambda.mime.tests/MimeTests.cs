@@ -5,6 +5,9 @@
 
 using System.Linq;
 using Xunit;
+using MimeKit;
+using MimeKit.Cryptography;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 using magic.node.extensions;
 
 namespace magic.lambda.mime.tests
@@ -79,6 +82,19 @@ Hello World!";
                 lambda.Children.First().Children.First().Children.Skip(1).First().Name);
             Assert.Equal("Hello World!",
                 lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
+        }
+
+        class MyPgpContext : OpenPgpContext
+        {
+            protected override string GetPasswordForKey(PgpSecretKey key)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            protected override PgpPublicKey GetPublicKey(MailboxAddress mailbox)
+            {
+                return base.GetPublicKey(mailbox);
+            }
         }
     }
 }
