@@ -54,5 +54,31 @@ this is another body text
             Assert.Equal("this is another body text",
                 lambda.Children.First().Children.First().Children.Skip(1).First().Children.First().GetEx<string>());
         }
+
+        [Fact]
+        public void ParseMessageWithHeaders()
+        {
+            string mimeMessage = @"MIME-Version: 1.0
+Content-Type: text/plain
+Content-Disposition: inline
+
+Hello World!";
+            var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
+            Assert.Single(lambda.Children.First().Children);
+            Assert.Equal("message",
+                lambda.Children.First().Children.First().Name);
+            Assert.Equal("text/plain",
+                lambda.Children.First().Children.First().GetEx<string>());
+            Assert.Equal("headers",
+                lambda.Children.First().Children.First().Children.First().Name);
+            Assert.Equal("Content-Disposition",
+                lambda.Children.First().Children.First().Children.First().Children.First().Name);
+            Assert.Equal("inline",
+                lambda.Children.First().Children.First().Children.First().Children.First().GetEx<string>());
+            Assert.Equal("content",
+                lambda.Children.First().Children.First().Children.Skip(1).First().Name);
+            Assert.Equal("Hello World!",
+                lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
+        }
     }
 }
