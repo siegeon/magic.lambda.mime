@@ -4,10 +4,11 @@
  */
 
 using System.IO;
+using System.Linq;
+using MimeKit;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
-using MimeKit;
 
 namespace magic.lambda.mime
 {
@@ -42,6 +43,7 @@ namespace magic.lambda.mime
         void Traverse(Node node, MimeEntity entity)
         {
             var tmp = new Node("message", entity.ContentType.MimeType);
+            ProcessHeaders(tmp, entity);
             if (entity is Multipart multi)
             {
                 // Multipart content.
@@ -57,6 +59,21 @@ namespace magic.lambda.mime
                 tmp.Add(new Node("content", text.GetText(out var encoding)));
             }
             node.Add(tmp);
+        }
+
+        void ProcessHeaders(Node node, MimeEntity entity)
+        {
+            var headers = new Node("headers");
+            foreach (var idx in entity.Headers)
+            {
+                if (idx.Id == HeaderId.ContentType)
+                    continue; // Ignored, since it's part of main "message" node.
+                headers.Add(new Node(idx.Field, idx.Value));
+            }
+
+            // We only add headers node if there are any headers.
+            if (headers.Children.Any())
+                node.Add(headers);
         }
 
         #endregion
