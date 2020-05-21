@@ -24,26 +24,35 @@ This is a multipart message in MIME format.
 Content-Type: text/plain
 
 this is the body text
-
 --XXXXboundary text
 Content-Type: text/plain;
 
 this is another body text
-
 --XXXXboundary text--";
             var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
             Assert.Single(lambda.Children.First().Children);
-            Assert.Equal("message", lambda.Children.First().Children.First().Name);
-            Assert.Equal("multipart/mixed;", lambda.Children.First().Children.First().GetEx<string>());
-            Assert.Equal(2, lambda.Children.First().Children.First().Children.First().Children.Count());
-            Assert.Equal("message", lambda.Children.First().Children.First().Children.First().Children.First().Name);
-            Assert.Equal("text/plain", lambda.Children.First().Children.First().Children.First().Children.First().GetEx<string>());
-            Assert.Equal("message", lambda.Children.First().Children.First().Children.First().Children.Skip(1).First().Name);
-            Assert.Equal("text/plain", lambda.Children.First().Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
-            Assert.Equal("content", lambda.Children.First().Children.First().Children.First().Children.First().Children.First().Name);
-            Assert.Equal("this is the body text", lambda.Children.First().Children.First().Children.First().Children.First().Children.First().GetEx<string>());
-            Assert.Equal("content", lambda.Children.First().Children.First().Children.First().Children.Skip(1).First().Children.First().Name);
-            Assert.Equal("this is another body text", lambda.Children.First().Children.First().Children.Skip(1).First().Children.First().Children.First().GetEx<string>());
+            Assert.Equal("message",
+                lambda.Children.First().Children.First().Name);
+            Assert.Equal("multipart/mixed",
+                lambda.Children.First().Children.First().GetEx<string>());
+            Assert.Equal(2, 
+                lambda.Children.First().Children.First().Children.Count());
+            Assert.Equal("message", 
+                lambda.Children.First().Children.First().Children.First().Name);
+            Assert.Equal("text/plain",
+                lambda.Children.First().Children.First().Children.First().GetEx<string>());
+            Assert.Equal("message",
+                lambda.Children.First().Children.First().Children.Skip(1).First().Name);
+            Assert.Equal("text/plain",
+                lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
+            Assert.Equal("content",
+                lambda.Children.First().Children.First().Children.First().Children.First().Name);
+            Assert.Equal("this is the body text",
+                lambda.Children.First().Children.First().Children.First().Children.First().GetEx<string>());
+            Assert.Equal("content",
+                lambda.Children.First().Children.First().Children.Skip(1).First().Children.First().Name);
+            Assert.Equal("this is another body text",
+                lambda.Children.First().Children.First().Children.Skip(1).First().Children.First().GetEx<string>());
         }
     }
 }

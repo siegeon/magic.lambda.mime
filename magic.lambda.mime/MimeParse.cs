@@ -50,9 +50,11 @@ namespace magic.lambda.mime
                     Traverse(tmp, idx);
                 }
             }
-            else
+            else if (entity is TextPart text)
             {
                 // Singular content type.
+                // Notice! We don't really care about the encoding the text was encoded with.
+                tmp.Add(new Node("content", text.GetText(out var encoding)));
             }
             node.Add(tmp);
         }
