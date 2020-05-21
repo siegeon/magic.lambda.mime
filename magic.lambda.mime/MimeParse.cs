@@ -3,8 +3,11 @@
  * See the enclosed LICENSE file for details.
  */
 
+using System.IO;
 using magic.node;
+using magic.node.extensions;
 using magic.signals.contracts;
+using MimeKit;
 
 namespace magic.lambda.mime
 {
@@ -21,6 +24,39 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(stream))
+                {
+                    writer.Write(input.GetEx<string>());
+                    writer.Flush();
+                    stream.Position = 0;
+                    var message = MimeMessage.Load(stream);
+                    Traverse(input, message.Body);
+                }
+            }
         }
+
+        #region [ -- Private helper methods -- ]
+
+        void Traverse(Node node, MimeEntity entity)
+        {
+            var tmp = new Node("message", entity.ContentType.MimeType);
+            if (entity is Multipart multi)
+            {
+                // Multipart content.
+                foreach (var idx in multi)
+                {
+                    Traverse(tmp, idx);
+                }
+            }
+            else
+            {
+                // Singular content type.
+            }
+            node.Add(tmp);
+        }
+
+        #endregion
     }
 }
