@@ -5,7 +5,9 @@
 
 using System.IO;
 using System.Linq;
+using System.Security;
 using MimeKit;
+using MimeKit.Cryptography;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
@@ -44,7 +46,25 @@ namespace magic.lambda.mime
         {
             var tmp = new Node("message", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
-            if (entity is Multipart multi)
+            if (entity is MultipartSigned signed)
+            {
+                // Multipart content.
+                var signatures = new Node("signatures");
+                foreach (var idx in signed.Verify())
+                {
+                    if (!idx.Verify())
+                        throw new SecurityException("Signature of MIME message was not valid");
+                    signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
+                }
+                tmp.Add(signatures);
+
+                // Then traversing content of multipart/signed message.
+                foreach (var idx in signed)
+                {
+                    Traverse(tmp, idx);
+                }
+            }
+            else if (entity is Multipart multi)
             {
                 // Multipart content.
                 foreach (var idx in multi)
