@@ -3,8 +3,6 @@
  * See the enclosed LICENSE file for details.
  */
 
-using magic.node.extensions;
-using System.Linq;
 using Xunit;
 
 namespace magic.lambda.mime.tests
@@ -14,6 +12,26 @@ namespace magic.lambda.mime.tests
         [Fact]
         public void ParseSimpleMessage()
         {
+            string mimeMessage = @"MIME-Version: 1.0
+Content-Type: multipart/mixed;
+        boundary=""XXXXboundary text""
+
+This is a multipart message in MIME format.
+
+--XXXXboundary text
+Content - Type: text / plain
+
+this is the body text
+
+--XXXXboundary text
+Content - Type: text / plain;
+            Content - Disposition: attachment;
+            filename = ""test.txt""
+
+this is the attachment text
+
+--XXXXboundary text--";
+            var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
         }
     }
 }
