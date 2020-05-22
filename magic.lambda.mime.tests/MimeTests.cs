@@ -9,6 +9,7 @@ using MimeKit;
 using MimeKit.Cryptography;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using magic.node.extensions;
+using magic.node;
 
 namespace magic.lambda.mime.tests
 {
@@ -38,9 +39,9 @@ this is another body text
                 lambda.Children.First().Children.First().Name);
             Assert.Equal("multipart/mixed",
                 lambda.Children.First().Children.First().GetEx<string>());
-            Assert.Equal(2, 
+            Assert.Equal(2,
                 lambda.Children.First().Children.First().Children.Count());
-            Assert.Equal("message", 
+            Assert.Equal("message",
                 lambda.Children.First().Children.First().Children.First().Name);
             Assert.Equal("text/plain",
                 lambda.Children.First().Children.First().Children.First().GetEx<string>());
@@ -82,6 +83,22 @@ Hello World!";
                 lambda.Children.First().Children.First().Children.Skip(1).First().Name);
             Assert.Equal("Hello World!",
                 lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
+        }
+
+        [Fact]
+        public void CreateSimpleMessage()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("");
+            var message = new Node("message", "text/plain");
+            var content = new Node("content", "foo bar");
+            message.Add(content);
+            node.Add(message);
+            signaler.Signal(".mime.create", node);
+            var rawMessage = node.Value;
+            Assert.Equal(@"Content-Type: text/plain
+
+foo bar", rawMessage.ToString());
         }
     }
 }

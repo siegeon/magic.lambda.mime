@@ -25,6 +25,12 @@ namespace magic.lambda.mime.tests
             return lambda;
         }
 
+        static public ISignaler GetSignaler()
+        {
+            var services = Initialize();
+            return services.GetService(typeof(ISignaler)) as ISignaler;
+        }
+
         #region [ -- Private helper methods -- ]
 
         static IServiceProvider Initialize()
