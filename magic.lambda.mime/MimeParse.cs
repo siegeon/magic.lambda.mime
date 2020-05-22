@@ -36,6 +36,7 @@ namespace magic.lambda.mime
                     stream.Position = 0;
                     var message = MimeMessage.Load(stream);
                     Traverse(input, message.Body);
+                    input.Value = null;
                 }
             }
         }
@@ -44,7 +45,7 @@ namespace magic.lambda.mime
 
         void Traverse(Node node, MimeEntity entity)
         {
-            var tmp = new Node("message", entity.ContentType.MimeType);
+            var tmp = new Node("entity", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
 
             // TODO: Implement PGP Context (somehow) - Reading public keys from database.
@@ -89,7 +90,7 @@ namespace magic.lambda.mime
             foreach (var idx in entity.Headers)
             {
                 if (idx.Id == HeaderId.ContentType)
-                    continue; // Ignored, since it's part of main "message" node.
+                    continue; // Ignored, since it's part of main "entity" node.
 
                 headers.Add(new Node(idx.Field, idx.Value));
             }

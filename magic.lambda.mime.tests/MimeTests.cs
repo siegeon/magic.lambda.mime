@@ -35,17 +35,17 @@ this is another body text
 --XXXXboundary text--";
             var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
             Assert.Single(lambda.Children.First().Children);
-            Assert.Equal("message",
+            Assert.Equal("entity",
                 lambda.Children.First().Children.First().Name);
             Assert.Equal("multipart/mixed",
                 lambda.Children.First().Children.First().GetEx<string>());
             Assert.Equal(2,
                 lambda.Children.First().Children.First().Children.Count());
-            Assert.Equal("message",
+            Assert.Equal("entity",
                 lambda.Children.First().Children.First().Children.First().Name);
             Assert.Equal("text/plain",
                 lambda.Children.First().Children.First().Children.First().GetEx<string>());
-            Assert.Equal("message",
+            Assert.Equal("entity",
                 lambda.Children.First().Children.First().Children.Skip(1).First().Name);
             Assert.Equal("text/plain",
                 lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
@@ -69,7 +69,7 @@ Content-Disposition: inline
 Hello World!";
             var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
             Assert.Single(lambda.Children.First().Children);
-            Assert.Equal("message",
+            Assert.Equal("entity",
                 lambda.Children.First().Children.First().Name);
             Assert.Equal("text/plain",
                 lambda.Children.First().Children.First().GetEx<string>());
@@ -90,7 +90,7 @@ Hello World!";
         {
             var signaler = Common.GetSignaler();
             var node = new Node("");
-            var message = new Node("message", "text/plain");
+            var message = new Node("entity", "text/plain");
             var content = new Node("content", "foo bar");
             message.Add(content);
             node.Add(message);
@@ -106,7 +106,7 @@ foo bar", rawMessage.ToString());
         {
             var signaler = Common.GetSignaler();
             var node = new Node("");
-            var message = new Node("message", "text/plain");
+            var message = new Node("entity", "text/plain");
             var content = new Node("content", "foo bar");
             message.Add(content);
             var header = new Node("Foo-Bar", "howdy");
@@ -127,13 +127,13 @@ foo bar", rawMessage.ToString());
 
             // Creating a Multipart
             var node = new Node("");
-            var message = new Node("message", "multipart/mixed");
+            var message = new Node("entity", "multipart/mixed");
             var content = new Node("content");
-            var message2 = new Node("message", "text/plain");
+            var message2 = new Node("entity", "text/plain");
             var content2 = new Node("content", "some text");
             content.Add(message2);
             message2.Add(content2);
-            var message3 = new Node("message", "text/plain");
+            var message3 = new Node("entity", "text/plain");
             var content3 = new Node("content", "some other text");
             content.Add(message3);
             message3.Add(content3);

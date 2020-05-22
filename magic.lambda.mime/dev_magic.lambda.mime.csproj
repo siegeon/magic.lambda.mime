@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>magic.lambda.crypto</AssemblyName>
+    <AssemblyName>magic.lambda.mime</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
