@@ -74,12 +74,21 @@ namespace magic.lambda.mime
         MimePart CreateLeafPart(string mainType, string subType, Node messageNode)
         {
             // Retrieving [content] node.
-            var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ?? 
+            var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
+                messageNode.Children.FirstOrDefault(x => x.Name == "filename") ??
                 throw new ArgumentNullException("No [content] provided in [message]");
 
             var result = new MimePart(ContentType.Parse(mainType + "/" + subType));
             DecorateEntityHeaders(result, messageNode);
-            CreateContentObjectFromObject(contentNode, result);
+            switch (contentNode.Name)
+            {
+                case "content":
+                    CreateContentObjectFromObject(contentNode, result);
+                    break;
+                case "filename":
+                    CreateContentObjectFromFilename(contentNode, result);
+                    break;
+            }
             return result;
         }
 
@@ -115,6 +124,34 @@ namespace magic.lambda.mime
             var encodingNode = contentNode.Children.FirstOrDefault(x => x.Name == "Content-Encoding");
             if (encodingNode != null)
                 encoding = (ContentEncoding)Enum.Parse(typeof(ContentEncoding), encodingNode.GetEx<string>());
+            part.Content = new MimeContent(stream, encoding);
+        }
+
+        /*
+         * Creates ContentObject from filename.
+         */
+         void CreateContentObjectFromFilename(Node contentNode, MimePart part)
+        {
+            var filename = contentNode.GetEx<string>();
+
+            // Checking if explicit encoding was supplied.
+            ContentEncoding encoding = ContentEncoding.Default;
+            var encodingNode = contentNode.Children.FirstOrDefault(x => x.Name == "Content-Encoding");
+            if (encodingNode != null)
+                encoding = (ContentEncoding)Enum.Parse(typeof(ContentEncoding), encodingNode.GetEx<string>());
+
+            // Checking if explicit disposition was specified.
+            if (part.ContentDisposition == null)
+            {
+                // Defaulting Content-Disposition to; "attachment; filename=whatever.xyz"
+                part.ContentDisposition = new ContentDisposition("attachment")
+                {
+                    FileName = Path.GetFileName(filename)
+                };
+            }
+            var stream = File.OpenRead(filename);
+
+            // TODO: Check up that MimeKit takes ownership of stream (disposes it after reading it).
             part.Content = new MimeContent(stream, encoding);
         }
 
