@@ -15,10 +15,10 @@ using magic.signals.contracts;
 namespace magic.lambda.mime
 {
     /// <summary>
-    /// Creates a MIME message and returns it as a MimeKit MimeMessage to caller (hidden)
+    /// Creates a MIME message and returns it as a MIME message to caller.
     /// </summary>
-    [Slot(Name = ".mime.create")]
-    public class MimeCreatePrivate : ISlot
+    [Slot(Name = "mime.create")]
+    public class MimeCreate : ISlot
     {
         /// <summary>
         /// Implementation of your slot.
@@ -27,7 +27,7 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            input.Value = MimeBuilder.CreateMimeMessage(input);
+            input.Value = MimeBuilder.CreateMimeMessage(input).ToString();
             input.Clear();
         }
     }
