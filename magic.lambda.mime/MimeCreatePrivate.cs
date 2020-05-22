@@ -61,6 +61,9 @@ namespace magic.lambda.mime
                 case "text":
                     result = CreateLeafPart(mainType, subType, input);
                     break;
+                case "multipart":
+                    result = CreateMultipart(mainType, subType, input);
+                    break;
             }
             return result;
         }
@@ -74,8 +77,22 @@ namespace magic.lambda.mime
             var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ?? 
                 throw new ArgumentNullException("No [content] provided in [message]");
 
-            MimePart result = new MimePart(ContentType.Parse(mainType + "/" + subType));
+            var result = new MimePart(ContentType.Parse(mainType + "/" + subType));
             CreateContentObjectFromObject(contentNode, result);
+            return result;
+        }
+
+        Multipart CreateMultipart(string mainType, string subType, Node messageNode)
+        {
+            // Retrieving [content] node.
+            var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
+                throw new ArgumentNullException("No [content] provided in [message]");
+
+            var result = new Multipart(subType);
+            foreach (var idxPart in contentNode.Children)
+            {
+                result.Add(CreateEntity(idxPart));
+            }
             return result;
         }
 

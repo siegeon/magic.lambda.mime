@@ -100,5 +100,39 @@ Hello World!";
 
 foo bar", rawMessage.ToString());
         }
+
+        [Fact]
+        public void CreateMultipartMessage()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("");
+            var message = new Node("message", "multipart/mixed");
+            var content = new Node("content");
+            var message2 = new Node("message", "text/plain");
+            var content2 = new Node("content", "some text");
+            content.Add(message2);
+            message2.Add(content2);
+            var message3 = new Node("message", "text/plain");
+            var content3 = new Node("content", "some other text");
+            content.Add(message3);
+            message3.Add(content3);
+            message.Add(content);
+            node.Add(message);
+            signaler.Signal(".mime.create", node);
+            var rawMessage = node.Value;
+            Assert.Equal(typeof(Multipart), rawMessage.GetType());
+            var multipart = rawMessage as Multipart;
+            Assert.Equal(2, multipart.Count);
+            Assert.Equal(typeof(MimePart), multipart.First().GetType());
+            Assert.Equal(typeof(MimePart), multipart.Skip(1).First().GetType());
+            var text1 = multipart.First() as MimePart;
+            Assert.Equal(@"Content-Type: text/plain
+
+some text", text1.ToString());
+            var text2 = multipart.Skip(1).First() as MimePart;
+            Assert.Equal(@"Content-Type: text/plain
+
+some other text", text2.ToString());
+        }
     }
 }
