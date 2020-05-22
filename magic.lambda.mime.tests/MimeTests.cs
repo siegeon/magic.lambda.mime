@@ -16,7 +16,7 @@ namespace magic.lambda.mime.tests
     public class MimeTests
     {
         [Fact]
-        public void ParseSimpleMessage()
+        public void ParseMultipartMessage()
         {
             string mimeMessage = @"MIME-Version: 1.0
 Content-Type: multipart/mixed;
@@ -105,6 +105,8 @@ foo bar", rawMessage.ToString());
         public void CreateMultipartMessage()
         {
             var signaler = Common.GetSignaler();
+
+            // Creating a Multipart
             var node = new Node("");
             var message = new Node("message", "multipart/mixed");
             var content = new Node("content");
@@ -120,6 +122,8 @@ foo bar", rawMessage.ToString());
             node.Add(message);
             signaler.Signal(".mime.create", node);
             var rawMessage = node.Value;
+
+            // Running through a couple of simple asserts.
             Assert.Equal(typeof(Multipart), rawMessage.GetType());
             var multipart = rawMessage as Multipart;
             Assert.Equal(2, multipart.Count);
