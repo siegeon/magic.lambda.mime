@@ -28,6 +28,7 @@ namespace magic.lambda.mime
         public void Signal(ISignaler signaler, Node input)
         {
             input.Value = CreateMimeMessage(input);
+            input.Clear();
         }
 
         #region [ -- Private helper methods -- ]
