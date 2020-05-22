@@ -83,18 +83,5 @@ Hello World!";
             Assert.Equal("Hello World!",
                 lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
         }
-
-        class MyPgpContext : OpenPgpContext
-        {
-            protected override string GetPasswordForKey(PgpSecretKey key)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            protected override PgpPublicKey GetPublicKey(MailboxAddress mailbox)
-            {
-                return base.GetPublicKey(mailbox);
-            }
-        }
     }
 }

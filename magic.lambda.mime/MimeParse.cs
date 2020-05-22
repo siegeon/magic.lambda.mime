@@ -46,6 +46,8 @@ namespace magic.lambda.mime
         {
             var tmp = new Node("message", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
+
+            // TODO: Implement PGP Context (somehow) - Reading public keys from database.
             if (entity is MultipartSigned signed)
             {
                 // Multipart content.
@@ -88,6 +90,7 @@ namespace magic.lambda.mime
             {
                 if (idx.Id == HeaderId.ContentType)
                     continue; // Ignored, since it's part of main "message" node.
+
                 headers.Add(new Node(idx.Field, idx.Value));
             }
 
