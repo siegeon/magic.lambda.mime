@@ -102,6 +102,25 @@ foo bar", rawMessage.ToString());
         }
 
         [Fact]
+        public void CreateMessageWithHeaders()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("");
+            var message = new Node("message", "text/plain");
+            var content = new Node("content", "foo bar");
+            message.Add(content);
+            var header = new Node("Foo-Bar", "howdy");
+            message.Add(header);
+            node.Add(message);
+            signaler.Signal(".mime.create", node);
+            var rawMessage = node.Value;
+            Assert.Equal(@"Content-Type: text/plain
+Foo-Bar: howdy
+
+foo bar", rawMessage.ToString());
+        }
+
+        [Fact]
         public void CreateMultipartMessage()
         {
             var signaler = Common.GetSignaler();

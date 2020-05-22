@@ -78,6 +78,7 @@ namespace magic.lambda.mime
                 throw new ArgumentNullException("No [content] provided in [message]");
 
             var result = new MimePart(ContentType.Parse(mainType + "/" + subType));
+            DecorateEntityHeaders(result, messageNode);
             CreateContentObjectFromObject(contentNode, result);
             return result;
         }
@@ -89,6 +90,7 @@ namespace magic.lambda.mime
                 throw new ArgumentNullException("No [content] provided in [message]");
 
             var result = new Multipart(subType);
+            DecorateEntityHeaders(result, messageNode);
             foreach (var idxPart in contentNode.Children)
             {
                 result.Add(CreateEntity(idxPart));
@@ -114,6 +116,18 @@ namespace magic.lambda.mime
             if (encodingNode != null)
                 encoding = (ContentEncoding)Enum.Parse(typeof(ContentEncoding), encodingNode.GetEx<string>());
             part.Content = new MimeContent(stream, encoding);
+        }
+
+        /*
+         * Decorates MimeEntity with headers specified in Node children collection.
+         */
+        void DecorateEntityHeaders(MimeEntity entity, Node messageNode)
+        {
+            foreach (var idxHeader in messageNode.Children.Where(ix => ix.Name != "Content-Type" && ix.Name.ToLower() != ix.Name))
+            {
+                // Adding currently iterated MIME header to entity.
+                entity.Headers.Replace(idxHeader.Name, idxHeader.GetEx<string>());
+            }
         }
 
         #endregion
