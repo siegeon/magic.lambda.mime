@@ -123,10 +123,9 @@ namespace magic.lambda.mime
          */
         void DecorateEntityHeaders(MimeEntity entity, Node messageNode)
         {
-            foreach (var idxHeader in messageNode.Children.Where(ix => ix.Name != "Content-Type" && ix.Name.ToLower() != ix.Name))
+            foreach (var idx in messageNode.Children.Where(ix => ix.Name != "Content-Type" && ix.Name != "content"))
             {
-                // Adding currently iterated MIME header to entity.
-                entity.Headers.Replace(idxHeader.Name, idxHeader.GetEx<string>());
+                entity.Headers.Replace(idx.Name, idx.GetEx<string>());
             }
         }
 
