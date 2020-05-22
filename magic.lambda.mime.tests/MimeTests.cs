@@ -86,6 +86,27 @@ Hello World!";
         }
 
         [Fact]
+        public void ParseRawMessage()
+        {
+            var entity = new TextPart("plain")
+            {
+                Text = "Hello World!"
+            };
+            var lambda = new Node("", entity);
+            var signaler = Common.GetSignaler();
+            signaler.Signal(".mime.parse", lambda);
+            Assert.Single(lambda.Children.First().Children);
+            Assert.Equal("entity",
+                lambda.Children.First().Name);
+            Assert.Equal("text/plain",
+                lambda.Children.First().GetEx<string>());
+            Assert.Equal("content",
+                lambda.Children.First().Children.First().Name);
+            Assert.Equal("Hello World!",
+                lambda.Children.First().Children.First().GetEx<string>());
+        }
+
+        [Fact]
         public void CreateSimpleMessage()
         {
             var signaler = Common.GetSignaler();

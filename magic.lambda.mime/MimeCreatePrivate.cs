@@ -3,14 +3,9 @@
  * See the enclosed LICENSE file for details.
  */
 
-using System;
-using System.IO;
-using System.Linq;
-using MimeKit;
-using MimeKit.IO;
 using magic.node;
-using magic.node.extensions;
 using magic.signals.contracts;
+using magic.lambda.mime.helpers;
 
 namespace magic.lambda.mime
 {

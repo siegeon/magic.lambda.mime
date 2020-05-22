@@ -3,7 +3,6 @@
  * See the enclosed LICENSE file for details.
  */
 
-using System.IO;
 using MimeKit;
 using magic.node;
 using magic.node.extensions;
@@ -13,10 +12,10 @@ using magic.lambda.mime.helpers;
 namespace magic.lambda.mime
 {
     /// <summary>
-    /// Parses a MIME message and returns its as a hierarchical object of lambda to caller.
+    /// Parses a MimeEntity message and returns its as a hierarchical object of lambda to caller.
     /// </summary>
-    [Slot(Name = "mime.parse")]
-    public class MimeParse : ISlot
+    [Slot(Name = ".mime.parse")]
+    public class MimeParsePrivate : ISlot
     {
         /// <summary>
         /// Implementation of your slot.
@@ -25,18 +24,9 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            using (var stream = new MemoryStream())
-            {
-                using (var writer = new StreamWriter(stream))
-                {
-                    writer.Write(input.GetEx<string>());
-                    writer.Flush();
-                    stream.Position = 0;
-                    var message = MimeMessage.Load(stream);
-                    MimeBuilder.Traverse(input, message.Body);
-                    input.Value = null;
-                }
-            }
+            var message = input.Value as MimeEntity;
+            MimeBuilder.Traverse(input, message);
+            input.Value = null;
         }
     }
 }
