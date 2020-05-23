@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyName>magic.lambda.crypto.tests</AssemblyName>
+    <AssemblyName>magic.lambda.mail.tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
