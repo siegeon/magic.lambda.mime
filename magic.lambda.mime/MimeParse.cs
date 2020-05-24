@@ -25,17 +25,14 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(new MemoryStream()))
             {
-                using (var writer = new StreamWriter(stream))
-                {
-                    writer.Write(input.GetEx<string>());
-                    writer.Flush();
-                    stream.Position = 0;
-                    var message = MimeMessage.Load(stream);
-                    MimeBuilder.Traverse(input, message.Body);
-                    input.Value = null;
-                }
+                writer.Write(input.GetEx<string>());
+                writer.Flush();
+                writer.BaseStream.Position = 0;
+                var message = MimeMessage.Load(writer.BaseStream);
+                MimeBuilder.Traverse(input, message.Body);
+                input.Value = null;
             }
         }
     }
