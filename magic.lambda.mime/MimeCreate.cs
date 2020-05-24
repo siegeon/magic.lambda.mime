@@ -3,6 +3,8 @@
  * See the enclosed LICENSE file for details.
  */
 
+using System.IO;
+using System.Collections.Generic;
 using magic.node;
 using magic.signals.contracts;
 using magic.lambda.mime.helpers;
@@ -22,8 +24,19 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            input.Value = MimeBuilder.CreateMimeMessage(input).ToString();
-            input.Clear();
+            var streams = new List<Stream>();
+            try
+            {
+                input.Value = MimeBuilder.CreateMimeMessage(input, streams).ToString();
+                input.Clear();
+            }
+            finally
+            {
+                foreach (var idx in streams)
+                {
+                    idx.Dispose();
+                }
+            }
         }
     }
 }

@@ -3,13 +3,14 @@
  * See the enclosed LICENSE file for details.
  */
 
+using System;
+using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using Xunit;
 using MimeKit;
-using MimeKit.Cryptography;
-using Org.BouncyCastle.Bcpg.OpenPgp;
-using magic.node.extensions;
 using magic.node;
+using magic.node.extensions;
 
 namespace magic.lambda.mime.tests
 {
@@ -116,10 +117,14 @@ Hello World!";
             message.Add(content);
             node.Add(message);
             signaler.Signal(".mime.create", node);
-            var rawMessage = node.Value;
+            var tuple = node.Value as Tuple<MimeMessage, List<Stream>>;
+            foreach (var idx in tuple.Item2)
+            {
+                idx.Dispose();
+            }
             Assert.Equal(@"Content-Type: text/plain
 
-foo bar", rawMessage.ToString());
+foo bar", tuple.Item1.ToString());
         }
 
         [Fact]
@@ -136,11 +141,15 @@ foo bar", rawMessage.ToString());
             headers.Add(header);
             node.Add(message);
             signaler.Signal(".mime.create", node);
-            var rawMessage = node.Value;
+            var tuple = node.Value as Tuple<MimeEntity, List<Stream>>;
+            foreach (var idx in tuple.Item2)
+            {
+                idx.Dispose();
+            }
             Assert.Equal(@"Content-Type: text/plain
 Foo-Bar: howdy
 
-foo bar", rawMessage.ToString());
+foo bar", tuple.Item2.ToString());
         }
 
         [Fact]
@@ -163,11 +172,15 @@ foo bar", rawMessage.ToString());
             message.Add(content);
             node.Add(message);
             signaler.Signal(".mime.create", node);
-            var rawMessage = node.Value;
+            var tuple = node.Value as Tuple<MimeEntity, List<Stream>>;
+            foreach (var idx in tuple.Item2)
+            {
+                idx.Dispose();
+            }
 
             // Running through a couple of simple asserts.
-            Assert.Equal(typeof(Multipart), rawMessage.GetType());
-            var multipart = rawMessage as Multipart;
+            Assert.Equal(typeof(Multipart), tuple.Item1.GetType());
+            var multipart = tuple.Item1 as Multipart;
             Assert.Equal(2, multipart.Count);
             Assert.Equal(typeof(MimePart), multipart.First().GetType());
             Assert.Equal(typeof(MimePart), multipart.Skip(1).First().GetType());
