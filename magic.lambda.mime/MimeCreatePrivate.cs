@@ -14,7 +14,10 @@ using magic.lambda.mime.helpers;
 namespace magic.lambda.mime
 {
     /// <summary>
-    /// Creates a MIME message and returns it as a MimeKit MimeMessage to caller (hidden)
+    /// Creates a MIME entity and returns it as a MimeKit MimeEntity to caller (hidden),
+    /// in addition to returning all streams created during process. Value returned is
+    /// Tuple<MimeEntity, List<Stream>>, and all streams must be disposed after entity has
+    /// somehow been used.
     /// </summary>
     [Slot(Name = ".mime.create")]
     public class MimeCreatePrivate : ISlot
