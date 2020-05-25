@@ -3,15 +3,11 @@
  * See the enclosed LICENSE file for details.
  */
 
-using System;
-using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using Xunit;
 using MimeKit;
 using magic.node;
 using magic.node.extensions;
-using magic.lambda.mime.helpers;
 
 namespace magic.lambda.mime.tests
 {
@@ -127,7 +123,7 @@ foo bar", entity.ToString());
             }
             finally
             {
-                MimeBuilder.Dispose(entity);
+                Common.Dispose(entity);
             }
         }
 
@@ -155,7 +151,7 @@ foo bar", entity.ToString());
             }
             finally
             {
-                MimeBuilder.Dispose(entity);
+                Common.Dispose(entity);
             }
         }
 
@@ -200,7 +196,7 @@ some other text", text2.ToString());
             }
             finally
             {
-                MimeBuilder.Dispose(entity);
+                Common.Dispose(entity);
             }
         }
     }

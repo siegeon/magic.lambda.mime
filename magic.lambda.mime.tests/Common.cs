@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
+using MimeKit;
 using magic.node;
 using magic.signals.services;
 using magic.signals.contracts;
@@ -29,6 +30,21 @@ namespace magic.lambda.mime.tests
         {
             var services = Initialize();
             return services.GetService(typeof(ISignaler)) as ISignaler;
+        }
+
+        public static void Dispose(MimeEntity entity)
+        {
+            if (entity is MimePart part)
+            {
+                part.Content?.Stream?.Dispose();
+            }
+            else if (entity is Multipart multi)
+            {
+                foreach (var idx in multi)
+                {
+                    Dispose(idx);
+                }
+            }
         }
 
         #region [ -- Private helper methods -- ]
