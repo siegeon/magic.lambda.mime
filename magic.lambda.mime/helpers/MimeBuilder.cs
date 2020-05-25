@@ -7,7 +7,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Security;
-using System.Collections.Generic;
 using MimeKit;
 using MimeKit.IO;
 using MimeKit.Cryptography;
@@ -19,23 +18,23 @@ namespace magic.lambda.mime.helpers
     /*
      * Internal helper class to create a MimeEntity.
      */
-    public class MimeBuilder
+    public static class MimeBuilder
     {
         /*
          * Creates a MimeEntity given the structured input node, and returns MimeEntity to caller.
          */
-        public static MimeEntity CreateMimeMessage(Node input, List<Stream> streams)
+        public static MimeEntity Create(Node input)
         {
             var messageNodes = input.Children.Where(x => x.Name == "entity");
             if (messageNodes.Count() != 1)
                 throw new ArgumentException("Too many [entity] nodes found for [.mime.create] slot to handle.");
-            return CreateEntity(messageNodes.First(), streams);
+            return CreateEntity(messageNodes.First());
         }
 
         /*
          * Parses a MimeEntity and returns as lambda to caller.
          */
-        public static void Traverse(Node node, MimeEntity entity)
+        public static void Parse(Node node, MimeEntity entity)
         {
             var tmp = new Node("entity", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
@@ -56,7 +55,7 @@ namespace magic.lambda.mime.helpers
                 // Then traversing content of multipart/signed message.
                 foreach (var idx in signed)
                 {
-                    Traverse(tmp, idx);
+                    Parse(tmp, idx);
                 }
             }
             else if (entity is Multipart multi)
@@ -64,7 +63,7 @@ namespace magic.lambda.mime.helpers
                 // Multipart content.
                 foreach (var idx in multi)
                 {
-                    Traverse(tmp, idx);
+                    Parse(tmp, idx);
                 }
             }
             else if (entity is TextPart text)
@@ -76,12 +75,27 @@ namespace magic.lambda.mime.helpers
             node.Add(tmp);
         }
 
+        public static void Dispose(MimeEntity entity)
+        {
+            if (entity is MimePart part)
+            {
+                part.Content?.Stream?.Dispose();
+            }
+            else if (entity is Multipart multi)
+            {
+                foreach (var idx in multi)
+                {
+                    Dispose(idx);
+                }
+            }
+        }
+
         #region [ -- Private helper methods -- ]
 
         /*
          * Create MimeEntity, or MIME part to be specific.
          */
-        static MimeEntity CreateEntity(Node input, List<Stream> streams)
+        static MimeEntity CreateEntity(Node input)
         {
             MimeEntity result = null;
 
@@ -97,10 +111,10 @@ namespace magic.lambda.mime.helpers
             switch (mainType)
             {
                 case "text":
-                    result = CreateLeafPart(mainType, subType, input, streams);
+                    result = CreateLeafPart(mainType, subType, input);
                     break;
                 case "multipart":
-                    result = CreateMultipart(mainType, subType, input, streams);
+                    result = CreateMultipart(subType, input);
                     break;
             }
             return result;
@@ -112,8 +126,7 @@ namespace magic.lambda.mime.helpers
         static MimePart CreateLeafPart(
             string mainType,
             string subType,
-            Node messageNode,
-            List<Stream> streams)
+            Node messageNode)
         {
             // Retrieving [content] node.
             var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
@@ -125,20 +138,18 @@ namespace magic.lambda.mime.helpers
             switch (contentNode.Name)
             {
                 case "content":
-                    CreateContentObjectFromObject(contentNode, result, streams);
+                    CreateContentObjectFromObject(contentNode, result);
                     break;
                 case "filename":
-                    CreateContentObjectFromFilename(contentNode, result, streams);
+                    CreateContentObjectFromFilename(contentNode, result);
                     break;
             }
             return result;
         }
 
         static Multipart CreateMultipart(
-            string mainType,
             string subType,
-            Node messageNode,
-            List<Stream> streams)
+            Node messageNode)
         {
             // Retrieving [content] node.
             var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
@@ -148,7 +159,7 @@ namespace magic.lambda.mime.helpers
             DecorateEntityHeaders(result, messageNode);
             foreach (var idxPart in contentNode.Children)
             {
-                result.Add(CreateEntity(idxPart, streams));
+                result.Add(CreateEntity(idxPart));
             }
             return result;
         }
@@ -158,11 +169,9 @@ namespace magic.lambda.mime.helpers
          */
         static void CreateContentObjectFromObject(
             Node contentNode,
-            MimePart part,
-            List<Stream> streams)
+            MimePart part)
         {
             var stream = new MemoryBlockStream();
-            streams.Add(stream);
             var content = contentNode.GetEx<string>() ??
                 throw new ArgumentNullException("Noe actual [content] supplied to message");
             var writer = new StreamWriter(stream);
@@ -182,8 +191,7 @@ namespace magic.lambda.mime.helpers
          */
         static void CreateContentObjectFromFilename(
             Node contentNode,
-            MimePart part,
-            List<Stream> streams)
+            MimePart part)
         {
             var filename = contentNode.GetEx<string>();
 
@@ -202,11 +210,7 @@ namespace magic.lambda.mime.helpers
                     FileName = Path.GetFileName(filename)
                 };
             }
-            var stream = File.OpenRead(filename);
-            streams.Add(stream);
-
-            // TODO: Check up that MimeKit takes ownership of stream (disposes it after reading it).
-            part.Content = new MimeContent(stream, encoding);
+            part.Content = new MimeContent(File.OpenRead(filename), encoding);
         }
 
         /*

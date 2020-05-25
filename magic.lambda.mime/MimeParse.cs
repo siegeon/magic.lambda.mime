@@ -31,7 +31,7 @@ namespace magic.lambda.mime
                 writer.Flush();
                 writer.BaseStream.Position = 0;
                 var message = MimeMessage.Load(writer.BaseStream);
-                MimeBuilder.Traverse(input, message.Body);
+                MimeBuilder.Parse(input, message.Body);
                 input.Value = null;
             }
         }

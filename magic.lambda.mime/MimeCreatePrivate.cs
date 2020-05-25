@@ -3,10 +3,6 @@
  * See the enclosed LICENSE file for details.
  */
 
-using System;
-using System.IO;
-using System.Collections.Generic;
-using MimeKit;
 using magic.node;
 using magic.signals.contracts;
 using magic.lambda.mime.helpers;
@@ -14,10 +10,10 @@ using magic.lambda.mime.helpers;
 namespace magic.lambda.mime
 {
     /// <summary>
-    /// Creates a MIME entity and returns it as a MimeKit MimeEntity to caller (hidden),
-    /// in addition to returning all streams created during process. Value returned is
-    /// Tuple<MimeEntity, List<Stream>>, and all streams must be disposed after entity has
-    /// somehow been used.
+    /// Creates a MIME entity and returns it as a MimeKit MimeEntity to caller (hidden).
+    /// 
+    /// Notice, caller is responsible for disposing any streams created during process, but this
+    /// can be easily done by using the MimeBuilder.DisposeStreams on the MimeEntity returned.
     /// </summary>
     [Slot(Name = ".mime.create")]
     public class MimeCreatePrivate : ISlot
@@ -29,22 +25,8 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            var streams = new List<Stream>();
-            try
-            {
-                input.Value = new Tuple<MimeEntity, List<Stream>>(
-                    MimeBuilder.CreateMimeMessage(input, streams),
-                    streams);
-                input.Clear();
-            }
-            catch
-            {
-                foreach (var idx in streams)
-                {
-                    idx.Dispose();
-                }
-                throw;
-            }
+            input.Value = MimeBuilder.Create(input);
+            input.Clear();
         }
     }
 }
