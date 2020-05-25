@@ -197,7 +197,7 @@ namespace magic.lambda.mime.helpers
             Node contentNode,
             MimePart part)
         {
-            var filename = contentNode.GetEx<string>();
+            var filename = contentNode.GetEx<string>() ?? throw new ArgumentNullException("No [filename] value provided");
 
             // Checking if explicit encoding was supplied.
             ContentEncoding encoding = ContentEncoding.Default;
@@ -216,7 +216,7 @@ namespace magic.lambda.mime.helpers
             }
             var rootPath = new Node();
             signaler.Signal("io.folders.root", rootPath);
-            part.Content = new MimeContent(File.OpenRead(rootPath.GetEx<string>() + filename), encoding);
+            part.Content = new MimeContent(File.OpenRead(rootPath.GetEx<string>() + filename.TrimStart('/')), encoding);
         }
 
         /*
