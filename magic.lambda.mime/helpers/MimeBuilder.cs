@@ -12,6 +12,7 @@ using MimeKit.IO;
 using MimeKit.Cryptography;
 using magic.node;
 using magic.node.extensions;
+using magic.signals.contracts;
 
 namespace magic.lambda.mime.helpers
 {
@@ -23,12 +24,12 @@ namespace magic.lambda.mime.helpers
         /*
          * Creates a MimeEntity given the structured input node, and returns MimeEntity to caller.
          */
-        public static MimeEntity Create(Node input)
+        public static MimeEntity Create(ISignaler signaler, Node input)
         {
             var messageNodes = input.Children.Where(x => x.Name == "entity");
             if (messageNodes.Count() != 1)
                 throw new ArgumentException("Too many [entity] nodes found for slot to handle.");
-            return CreateEntity(messageNodes.First());
+            return CreateEntity(signaler, messageNodes.First());
         }
 
         /*
@@ -95,7 +96,7 @@ namespace magic.lambda.mime.helpers
         /*
          * Create MimeEntity, or MIME part to be specific.
          */
-        static MimeEntity CreateEntity(Node input)
+        static MimeEntity CreateEntity(ISignaler signaler, Node input)
         {
             MimeEntity result = null;
 
@@ -111,10 +112,10 @@ namespace magic.lambda.mime.helpers
             switch (mainType)
             {
                 case "text":
-                    result = CreateLeafPart(mainType, subType, input);
+                    result = CreateLeafPart(signaler, mainType, subType, input);
                     break;
                 case "multipart":
-                    result = CreateMultipart(subType, input);
+                    result = CreateMultipart(signaler, subType, input);
                     break;
             }
             return result;
@@ -124,6 +125,7 @@ namespace magic.lambda.mime.helpers
          * Creates a leaf part, implying no MimePart children.
          */
         static MimePart CreateLeafPart(
+            ISignaler signaler,
             string mainType,
             string subType,
             Node messageNode)
@@ -141,13 +143,14 @@ namespace magic.lambda.mime.helpers
                     CreateContentObjectFromObject(contentNode, result);
                     break;
                 case "filename":
-                    CreateContentObjectFromFilename(contentNode, result);
+                    CreateContentObjectFromFilename(signaler, contentNode, result);
                     break;
             }
             return result;
         }
 
         static Multipart CreateMultipart(
+            ISignaler signaler,
             string subType,
             Node messageNode)
         {
@@ -159,7 +162,7 @@ namespace magic.lambda.mime.helpers
             DecorateEntityHeaders(result, messageNode);
             foreach (var idxPart in contentNode.Children)
             {
-                result.Add(CreateEntity(idxPart));
+                result.Add(CreateEntity(signaler, idxPart));
             }
             return result;
         }
@@ -190,6 +193,7 @@ namespace magic.lambda.mime.helpers
          * Creates ContentObject from filename.
          */
         static void CreateContentObjectFromFilename(
+            ISignaler signaler,
             Node contentNode,
             MimePart part)
         {
@@ -210,7 +214,9 @@ namespace magic.lambda.mime.helpers
                     FileName = Path.GetFileName(filename)
                 };
             }
-            part.Content = new MimeContent(File.OpenRead(filename), encoding);
+            var rootPath = new Node();
+            signaler.Signal("io.folders.root", rootPath);
+            part.Content = new MimeContent(File.OpenRead(rootPath.GetEx<string>() + filename), encoding);
         }
 
         /*

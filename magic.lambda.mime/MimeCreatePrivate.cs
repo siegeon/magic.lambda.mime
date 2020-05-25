@@ -25,7 +25,7 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            input.Value = MimeBuilder.Create(input);
+            input.Value = MimeBuilder.Create(signaler, input);
             input.Clear();
         }
     }
