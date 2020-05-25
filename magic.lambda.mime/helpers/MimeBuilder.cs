@@ -27,7 +27,7 @@ namespace magic.lambda.mime.helpers
         {
             var messageNodes = input.Children.Where(x => x.Name == "entity");
             if (messageNodes.Count() != 1)
-                throw new ArgumentException("Too many [entity] nodes found for [.mime.create] slot to handle.");
+                throw new ArgumentException("Too many [entity] nodes found for slot to handle.");
             return CreateEntity(messageNodes.First());
         }
 

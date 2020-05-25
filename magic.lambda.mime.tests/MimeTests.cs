@@ -11,6 +11,7 @@ using Xunit;
 using MimeKit;
 using magic.node;
 using magic.node.extensions;
+using magic.lambda.mime.helpers;
 
 namespace magic.lambda.mime.tests
 {
@@ -117,14 +118,17 @@ Hello World!";
             message.Add(content);
             node.Add(message);
             signaler.Signal(".mime.create", node);
-            var tuple = node.Value as Tuple<MimeMessage, List<Stream>>;
-            foreach (var idx in tuple.Item2)
+            var entity = node.Value as MimeEntity;
+            try
             {
-                idx.Dispose();
-            }
-            Assert.Equal(@"Content-Type: text/plain
+                Assert.Equal(@"Content-Type: text/plain
 
-foo bar", tuple.Item1.ToString());
+foo bar", entity.ToString());
+            }
+            finally
+            {
+                MimeBuilder.Dispose(entity);
+            }
         }
 
         [Fact]
@@ -141,15 +145,18 @@ foo bar", tuple.Item1.ToString());
             headers.Add(header);
             node.Add(message);
             signaler.Signal(".mime.create", node);
-            var tuple = node.Value as Tuple<MimeEntity, List<Stream>>;
-            foreach (var idx in tuple.Item2)
+            var entity = node.Value as MimeEntity;
+            try
             {
-                idx.Dispose();
-            }
-            Assert.Equal(@"Content-Type: text/plain
+                Assert.Equal(@"Content-Type: text/plain
 Foo-Bar: howdy
 
-foo bar", tuple.Item2.ToString());
+foo bar", entity.ToString());
+            }
+            finally
+            {
+                MimeBuilder.Dispose(entity);
+            }
         }
 
         [Fact]
@@ -172,26 +179,29 @@ foo bar", tuple.Item2.ToString());
             message.Add(content);
             node.Add(message);
             signaler.Signal(".mime.create", node);
-            var tuple = node.Value as Tuple<MimeEntity, List<Stream>>;
-            foreach (var idx in tuple.Item2)
+            var entity = node.Value as MimeEntity;
+            try
             {
-                idx.Dispose();
-            }
 
-            // Running through a couple of simple asserts.
-            Assert.Equal(typeof(Multipart), tuple.Item1.GetType());
-            var multipart = tuple.Item1 as Multipart;
-            Assert.Equal(2, multipart.Count);
-            Assert.Equal(typeof(MimePart), multipart.First().GetType());
-            Assert.Equal(typeof(MimePart), multipart.Skip(1).First().GetType());
-            var text1 = multipart.First() as MimePart;
-            Assert.Equal(@"Content-Type: text/plain
+                // Running through a couple of simple asserts.
+                Assert.Equal(typeof(Multipart), entity.GetType());
+                var multipart = entity as Multipart;
+                Assert.Equal(2, multipart.Count);
+                Assert.Equal(typeof(MimePart), multipart.First().GetType());
+                Assert.Equal(typeof(MimePart), multipart.Skip(1).First().GetType());
+                var text1 = multipart.First() as MimePart;
+                Assert.Equal(@"Content-Type: text/plain
 
 some text", text1.ToString());
-            var text2 = multipart.Skip(1).First() as MimePart;
-            Assert.Equal(@"Content-Type: text/plain
+                var text2 = multipart.Skip(1).First() as MimePart;
+                Assert.Equal(@"Content-Type: text/plain
 
 some other text", text2.ToString());
+            }
+            finally
+            {
+                MimeBuilder.Dispose(entity);
+            }
         }
     }
 }
