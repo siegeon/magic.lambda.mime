@@ -215,7 +215,7 @@ namespace magic.lambda.mime.helpers
                 };
             }
             var rootPath = new Node();
-            signaler.Signal("io.folders.root", rootPath);
+            signaler.Signal("io.folder.root", rootPath);
             part.Content = new MimeContent(File.OpenRead(rootPath.GetEx<string>() + filename.TrimStart('/')), encoding);
         }
 
