@@ -16,14 +16,17 @@ using magic.signals.contracts;
 
 namespace magic.lambda.mime.helpers
 {
-    /*
-     * Internal helper class to create a MimeEntity.
-     */
-    internal static class MimeBuilder
+    /// <summary>
+    /// Helper class to parse and construct MIME messages.
+    /// </summary>
+    public static class MimeBuilder
     {
-        /*
-         * Creates a MimeEntity given the structured input node, and returns MimeEntity to caller.
-         */
+        /// <summary>
+        /// Creates a MimeEntity given the structured input node, and returns MimeEntity to caller.
+        /// </summary>
+        /// <param name="signaler">Signaler used to construct message.</param>
+        /// <param name="input">Hierarchical node structure representing the MIME message in lambda format.</param>
+        /// <returns></returns>
         public static MimeEntity Create(ISignaler signaler, Node input)
         {
             var messageNodes = input.Children.Where(x => x.Name == "entity");
@@ -32,9 +35,11 @@ namespace magic.lambda.mime.helpers
             return CreateEntity(signaler, messageNodes.First());
         }
 
-        /*
-         * Parses a MimeEntity and returns as lambda to caller.
-         */
+        /// <summary>
+        /// Parses a MimeEntity and returns as lambda to caller.
+        /// </summary>
+        /// <param name="node">Node containing the MIME message as value, and also where the lambda structure representing the parsed message will be placed.</param>
+        /// <param name="entity"> MimeEntity to parse.</param>
         public static void Parse(Node node, MimeEntity entity)
         {
             var tmp = new Node("entity", entity.ContentType.MimeType);
@@ -76,6 +81,10 @@ namespace magic.lambda.mime.helpers
             node.Add(tmp);
         }
 
+        /// <summary>
+        /// Helper method to dispose a MimeEntity's streams.
+        /// </summary>
+        /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
         public static void Dispose(MimeEntity entity)
         {
             if (entity is MimePart part)
