@@ -26,7 +26,6 @@ namespace magic.lambda.mime.helpers
             var tmp = new Node("entity", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
 
-            // TODO: Implement PGP Context (somehow) - Reading public keys from database.
             if (entity is MultipartSigned signed)
             {
                 // Multipart content.
