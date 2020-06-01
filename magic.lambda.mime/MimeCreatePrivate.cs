@@ -3,6 +3,7 @@
  * See the enclosed LICENSE file for details.
  */
 
+using MimeKit.Cryptography;
 using magic.node;
 using magic.signals.contracts;
 using magic.lambda.mime.helpers;
@@ -18,6 +19,11 @@ namespace magic.lambda.mime
     [Slot(Name = ".mime.create")]
     public class MimeCreatePrivate : ISlot
     {
+        static MimeCreatePrivate()
+        {
+            CryptographyContext.Register(typeof(PGPContext));
+        }
+
         /// <summary>
         /// Implementation of your slot.
         /// </summary>

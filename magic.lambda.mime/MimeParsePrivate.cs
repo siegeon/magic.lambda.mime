@@ -4,8 +4,10 @@
  */
 
 using MimeKit;
+using MimeKit.Cryptography;
 using magic.node;
 using magic.signals.contracts;
+using magic.lambda.mime.helpers;
 
 namespace magic.lambda.mime
 {
@@ -15,6 +17,11 @@ namespace magic.lambda.mime
     [Slot(Name = ".mime.parse")]
     public class MimeParsePrivate : ISlot
     {
+        static MimeParsePrivate()
+        {
+            CryptographyContext.Register(typeof(PGPContext));
+        }
+
         /// <summary>
         /// Implementation of your slot.
         /// </summary>

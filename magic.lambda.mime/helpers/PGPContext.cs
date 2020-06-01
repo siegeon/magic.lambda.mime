@@ -4,6 +4,9 @@
  */
 
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using MimeKit;
 using MimeKit.Cryptography;
 using Org.BouncyCastle.Bcpg.OpenPgp;
@@ -12,11 +15,6 @@ namespace magic.lambda.mime.helpers
 {
     public class PGPContext : OpenPgpContext
     {
-        static PGPContext()
-        {
-            Register(typeof(PGPContext));
-        }
-
         protected override string GetPasswordForKey(PgpSecretKey key)
         {
             throw new System.NotImplementedException();
@@ -30,6 +28,71 @@ namespace magic.lambda.mime.helpers
         public override IEnumerable<PgpSecretKey> EnumerateSecretKeys(MailboxAddress mailbox)
         {
             return base.EnumerateSecretKeys(mailbox);
+        }
+
+        public override IEnumerable<PgpPublicKeyRing> EnumeratePublicKeyRings(MailboxAddress mailbox)
+        {
+            return base.EnumeratePublicKeyRings(mailbox);
+        }
+
+        public override IEnumerable<PgpPublicKeyRing> EnumeratePublicKeyRings()
+        {
+            return base.EnumeratePublicKeyRings();
+        }
+
+        public override IEnumerable<PgpPublicKey> EnumeratePublicKeys()
+        {
+            return base.EnumeratePublicKeys();
+        }
+
+        public override IEnumerable<PgpSecretKeyRing> EnumerateSecretKeyRings()
+        {
+            return base.EnumerateSecretKeyRings();
+        }
+
+        public override IEnumerable<PgpSecretKeyRing> EnumerateSecretKeyRings(MailboxAddress mailbox)
+        {
+            return base.EnumerateSecretKeyRings(mailbox);
+        }
+
+        public override IEnumerable<PgpSecretKey> EnumerateSecretKeys()
+        {
+            return base.EnumerateSecretKeys();
+        }
+
+        public override DigestAlgorithm GetDigestAlgorithm(string micalg)
+        {
+            return base.GetDigestAlgorithm(micalg);
+        }
+
+        public override string GetDigestAlgorithmName(DigestAlgorithm micalg)
+        {
+            return base.GetDigestAlgorithmName(micalg);
+        }
+
+        protected override PgpPublicKey GetPublicKey(MailboxAddress mailbox)
+        {
+            return base.GetPublicKey(mailbox);
+        }
+
+        protected override IList<PgpPublicKey> GetPublicKeys(IEnumerable<MailboxAddress> mailboxes)
+        {
+            return base.GetPublicKeys(mailboxes);
+        }
+
+        protected override PgpSecretKey GetSigningKey(MailboxAddress mailbox)
+        {
+            return base.GetSigningKey(mailbox);
+        }
+
+        public override DigitalSignatureCollection Verify(Stream content, Stream signatureData, CancellationToken cancellationToken = default)
+        {
+            return base.Verify(content, signatureData, cancellationToken);
+        }
+
+        public override Task<DigitalSignatureCollection> VerifyAsync(Stream content, Stream signatureData, CancellationToken cancellationToken = default)
+        {
+            return base.VerifyAsync(content, signatureData, cancellationToken);
         }
     }
 }

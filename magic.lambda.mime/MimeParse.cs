@@ -6,9 +6,11 @@
 using System.IO;
 using System.Text;
 using MimeKit;
+using MimeKit.Cryptography;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
+using magic.lambda.mime.helpers;
 
 namespace magic.lambda.mime
 {
@@ -18,6 +20,11 @@ namespace magic.lambda.mime
     [Slot(Name = "mime.parse")]
     public class MimeParse : ISlot
     {
+        static MimeParse()
+        {
+            CryptographyContext.Register(typeof(PGPContext));
+        }
+
         /// <summary>
         /// Implementation of your slot.
         /// </summary>
