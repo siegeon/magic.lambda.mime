@@ -6,7 +6,6 @@
 using MimeKit;
 using magic.node;
 using magic.signals.contracts;
-using magic.lambda.mime.helpers;
 
 namespace magic.lambda.mime
 {
@@ -24,7 +23,7 @@ namespace magic.lambda.mime
         public void Signal(ISignaler signaler, Node input)
         {
             var message = input.Value as MimeEntity;
-            MimeBuilder.Parse(input, message);
+            helpers.MimeParser.Parse(input, message);
             input.Value = null;
         }
     }

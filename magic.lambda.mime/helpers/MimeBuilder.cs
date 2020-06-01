@@ -6,10 +6,8 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Security;
 using MimeKit;
 using MimeKit.IO;
-using MimeKit.Cryptography;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
@@ -17,7 +15,7 @@ using magic.signals.contracts;
 namespace magic.lambda.mime.helpers
 {
     /// <summary>
-    /// Helper class to parse and construct MIME messages.
+    /// Helper class to create MIME messages.
     /// </summary>
     public static class MimeBuilder
     {
@@ -33,52 +31,6 @@ namespace magic.lambda.mime.helpers
             if (messageNodes.Count() != 1)
                 throw new ArgumentException("Too many [entity] nodes found for slot to handle.");
             return CreateEntity(signaler, messageNodes.First());
-        }
-
-        /// <summary>
-        /// Parses a MimeEntity and returns as lambda to caller.
-        /// </summary>
-        /// <param name="node">Node containing the MIME message as value, and also where the lambda structure representing the parsed message will be placed.</param>
-        /// <param name="entity"> MimeEntity to parse.</param>
-        public static void Parse(Node node, MimeEntity entity)
-        {
-            var tmp = new Node("entity", entity.ContentType.MimeType);
-            ProcessHeaders(tmp, entity);
-
-            // TODO: Implement PGP Context (somehow) - Reading public keys from database.
-            if (entity is MultipartSigned signed)
-            {
-                // Multipart content.
-                var signatures = new Node("signatures");
-                foreach (var idx in signed.Verify())
-                {
-                    if (!idx.Verify())
-                        throw new SecurityException("Signature of MIME message was not valid");
-                    signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
-                }
-                tmp.Add(signatures);
-
-                // Then traversing content of multipart/signed message.
-                foreach (var idx in signed)
-                {
-                    Parse(tmp, idx);
-                }
-            }
-            else if (entity is Multipart multi)
-            {
-                // Multipart content.
-                foreach (var idx in multi)
-                {
-                    Parse(tmp, idx);
-                }
-            }
-            else if (entity is TextPart text)
-            {
-                // Singular content type.
-                // Notice! We don't really care about the encoding the text was encoded with.
-                tmp.Add(new Node("content", text.GetText(out var encoding)));
-            }
-            node.Add(tmp);
         }
 
         /// <summary>
@@ -240,25 +192,6 @@ namespace magic.lambda.mime.helpers
             {
                 entity.Headers.Replace(idx.Name, idx.GetEx<string>());
             }
-        }
-
-        /*
-         * Process MIME entity's headers, and adds up into node collection.
-         */
-        static void ProcessHeaders(Node node, MimeEntity entity)
-        {
-            var headers = new Node("headers");
-            foreach (var idx in entity.Headers)
-            {
-                if (idx.Id == HeaderId.ContentType)
-                    continue; // Ignored, since it's part of main "entity" node.
-
-                headers.Add(new Node(idx.Field, idx.Value));
-            }
-
-            // We only add headers node if there are any headers.
-            if (headers.Children.Any())
-                node.Add(headers);
         }
 
         #endregion

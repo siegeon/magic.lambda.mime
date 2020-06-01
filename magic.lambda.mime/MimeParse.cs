@@ -9,7 +9,6 @@ using MimeKit;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
-using magic.lambda.mime.helpers;
 
 namespace magic.lambda.mime
 {
@@ -29,7 +28,7 @@ namespace magic.lambda.mime
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
             {
                 var message = MimeMessage.Load(stream);
-                MimeBuilder.Parse(input, message.Body);
+                helpers.MimeParser.Parse(input, message.Body);
                 input.Value = null;
             }
         }
