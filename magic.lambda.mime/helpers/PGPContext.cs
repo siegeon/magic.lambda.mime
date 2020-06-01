@@ -12,6 +12,11 @@ namespace magic.lambda.mime.helpers
 {
     public class PGPContext : OpenPgpContext
     {
+        static PGPContext()
+        {
+            Register(typeof(PGPContext));
+        }
+
         protected override string GetPasswordForKey(PgpSecretKey key)
         {
             throw new System.NotImplementedException();
