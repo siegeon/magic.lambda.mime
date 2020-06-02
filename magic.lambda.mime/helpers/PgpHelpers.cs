@@ -40,5 +40,23 @@ namespace magic.lambda.mime.helpers
                 }
             }
         }
+
+        public static string GetKey(PgpSecretKey key)
+        {
+            using (var memStream = new MemoryStream())
+            {
+                using (var armored = new ArmoredOutputStream(memStream))
+                {
+                    key.Encode(armored);
+                    armored.Flush();
+                }
+                memStream.Flush();
+                memStream.Position = 0;
+                using (var sr = new StreamReader(memStream))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+        }
     }
 }

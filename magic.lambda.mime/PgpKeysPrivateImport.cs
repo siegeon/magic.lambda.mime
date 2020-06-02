@@ -19,8 +19,8 @@ namespace magic.lambda.mime
     /// <summary>
     /// Imports a public PGP key ring, which often is a master key, in addition to its sub keys.
     /// </summary>
-    [Slot(Name = "pgp.keys.public.import")]
-    public class PgpKeysPublicImport : ISlot
+    [Slot(Name = "pgp.keys.private.import")]
+    public class PgpKeysPrivateImport : ISlot
     {
         /// <summary>
         /// Implementation of your slot.
@@ -31,33 +31,29 @@ namespace magic.lambda.mime
         {
             // Sanity checking invocation.
             var keyPlainText = input.GetEx<string>() ?? 
-                throw new ArgumentNullException("No value provided to [pgp.keys.public.import]");
+                throw new ArgumentNullException("No value provided to [pgp.keys.private.import]");
             var lambda = input.Children.FirstOrDefault(x => x.Name == ".lambda") ??
-                throw new ArgumentNullException("No [.lambda] provided to [pgp.keys.public.import]");
+                throw new ArgumentNullException("No [.lambda] provided to [pgp.keys.private.import]");
 
             // Unwrapping key(s) and iterating through them, importing them one at the time.
             using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(keyPlainText)))
             {
                 using (var armored = new ArmoredInputStream(memStream))
                 {
-                    var key = new PgpPublicKeyRing(armored);
-                    foreach (PgpPublicKey idxKey in key.GetPublicKeys())
+                    var key = new PgpSecretKeyRing(armored);
+                    foreach (PgpSecretKey idxKey in key.GetSecretKeys())
                     {
                         // Parametrizing [.lambda] callback with key and data.
                         var keyNode = new Node(".key");
-                        keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(idxKey)));
+                        keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(idxKey.PublicKey)));
                         keyNode.Add(new Node("content", PgpHelpers.GetKey(idxKey)));
-                        keyNode.Add(new Node("created", idxKey.CreationTime));
-                        keyNode.Add(new Node("valid-seconds", idxKey.GetValidSeconds()));
-                        keyNode.Add(new Node("algorithm", idxKey.Algorithm.ToString()));
-                        keyNode.Add(new Node("bit-strength", idxKey.BitStrength));
-                        keyNode.Add(new Node("is-encryption", idxKey.IsEncryptionKey));
                         keyNode.Add(new Node("is-master", idxKey.IsMasterKey));
-                        keyNode.Add(new Node("is-revoked", idxKey.IsRevoked()));
+                        keyNode.Add(new Node("is-signing-key", idxKey.IsSigningKey));
+                        keyNode.Add(new Node("encryption-algorithm", idxKey.KeyEncryptionAlgorithm.ToString()));
 
                         // Adding ID for key.
                         var ids = new Node("ids");
-                        foreach (var idxId in idxKey.GetUserIds())
+                        foreach (var idxId in idxKey.UserIds)
                         {
                             ids.Add(new Node(".", idxId.ToString()));
                         }
