@@ -21,6 +21,9 @@ namespace magic.lambda.mime.helpers
         /// </summary>
         public string Password { get; set; }
 
+        /// <summary>
+        /// Secret key rings, if statically provided.
+        /// </summary>
         public PgpSecretKeyRing SecretKeyRings { get; set; }
 
         /// <summary>
@@ -31,41 +34,65 @@ namespace magic.lambda.mime.helpers
             return Password;
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpSecretKeyRing> EnumerateSecretKeyRings()
         {
             yield return SecretKeyRings;
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpSecretKeyRing> EnumerateSecretKeyRings(MailboxAddress mailbox)
         {
             return base.EnumerateSecretKeyRings(mailbox);
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpSecretKey> EnumerateSecretKeys()
         {
             return base.EnumerateSecretKeys();
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpSecretKey> EnumerateSecretKeys(MailboxAddress mailbox)
         {
             return base.EnumerateSecretKeys(mailbox);
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpPublicKeyRing> EnumeratePublicKeyRings()
         {
             return base.EnumeratePublicKeyRings();
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpPublicKeyRing> EnumeratePublicKeyRings(MailboxAddress mailbox)
         {
             return base.EnumeratePublicKeyRings(mailbox);
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpPublicKey> EnumeratePublicKeys()
         {
             return base.EnumeratePublicKeys();
         }
 
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
         public override IEnumerable<PgpPublicKey> EnumeratePublicKeys(MailboxAddress mailbox)
         {
             return base.EnumeratePublicKeys(mailbox);
