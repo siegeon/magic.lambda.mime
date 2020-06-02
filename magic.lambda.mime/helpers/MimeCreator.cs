@@ -19,7 +19,7 @@ namespace magic.lambda.mime.helpers
     /// <summary>
     /// Helper class to create MIME messages.
     /// </summary>
-    public static class MimeBuilder
+    public static class MimeCreator
     {
         /// <summary>
         /// Creates a MimeEntity given the structured input node, and returns MimeEntity to caller.

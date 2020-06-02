@@ -28,7 +28,7 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            var entity = MimeBuilder.Create(signaler, input);
+            var entity = MimeCreator.Create(signaler, input);
             try
             {
                 input.Value = entity.ToString();
@@ -36,7 +36,7 @@ namespace magic.lambda.mime
             }
             finally
             {
-                MimeBuilder.Dispose(entity);
+                MimeCreator.Dispose(entity);
             }
         }
     }
