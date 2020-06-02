@@ -6,6 +6,7 @@
 using System.Linq;
 using System.Security;
 using MimeKit;
+using MimeKit.IO;
 using MimeKit.Cryptography;
 using magic.node;
 
@@ -24,8 +25,8 @@ namespace magic.lambda.mime.helpers
         public static void Parse(
             Node node,
             MimeEntity entity,
-            string key = null,
-            string password = null)
+            string key,
+            string password)
         {
             var tmp = new Node("entity", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
@@ -45,7 +46,7 @@ namespace magic.lambda.mime.helpers
                 // Then traversing content of multipart/signed message.
                 foreach (var idx in signed)
                 {
-                    Parse(tmp, idx);
+                    Parse(tmp, idx, key, password);
                 }
             }
             else if (entity is MultipartEncrypted enc)
@@ -53,18 +54,9 @@ namespace magic.lambda.mime.helpers
                 var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(key);
                 using (var ctx = new PgpContext { Password = password, SecretKeyRings = secretKey })
                 {
-                    var decryptedEntity = enc.Decrypt(ctx, out var signatures);
-                    var cryptoSignatures = new Node("signatures");
-                    if (signatures != null && signatures.Any())
-                    {
-                        foreach (var idx in signatures)
-                        {
-                            cryptoSignatures.Add(new Node(idx.SignerCertificate.Fingerprint, idx.Verify()));
-                        }
-                        tmp.Add(cryptoSignatures);
-                    }
+                    var decryptedEntity = enc.Decrypt(ctx);
                     tmp.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(secretKey.GetPublicKey())));
-                    Parse(tmp, decryptedEntity);
+                    Parse(tmp, decryptedEntity, key, password);
                 }
             }
             else if (entity is Multipart multi)
@@ -72,7 +64,7 @@ namespace magic.lambda.mime.helpers
                 // Multipart content.
                 foreach (var idx in multi)
                 {
-                    Parse(tmp, idx);
+                    Parse(tmp, idx, key, password);
                 }
             }
             else if (entity is TextPart text)
@@ -80,6 +72,20 @@ namespace magic.lambda.mime.helpers
                 // Singular content type.
                 // Notice! We don't really care about the encoding the text was encoded with.
                 tmp.Add(new Node("content", text.GetText(out var encoding)));
+            }
+            else if (entity is MimePart part)
+            {
+                using (var stream = new MemoryBlockStream())
+                {
+                    // Decoding content to memory.
+                    part.Content.DecodeTo(stream);
+
+                    // Resetting position and setting up a buffer object to hold content.
+                    stream.Position = 0;
+
+                    // Putting content into return node for MimeEntity.
+                    tmp.Add(new Node("content", stream.ToArray()));
+                }
             }
             node.Add(tmp);
         }

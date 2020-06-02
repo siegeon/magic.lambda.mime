@@ -31,11 +31,6 @@ namespace magic.lambda.mime.helpers
             return Password;
         }
 
-        public override IEnumerable<PgpSecretKeyRing> EnumerateSecretKeyRings(MailboxAddress mailbox)
-        {
-            yield return SecretKeyRings;
-        }
-
         public override IEnumerable<PgpSecretKeyRing> EnumerateSecretKeyRings()
         {
             yield return SecretKeyRings;
