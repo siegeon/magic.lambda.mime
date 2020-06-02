@@ -3,18 +3,30 @@
  * See the enclosed LICENSE file for details.
  */
 
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using MimeKit;
 using MimeKit.Cryptography;
 using Org.BouncyCastle.Bcpg.OpenPgp;
+using magic.node;
 
 namespace magic.lambda.mime.helpers
 {
     public class PGPContext : OpenPgpContext
     {
+        readonly Node _lambda;
+
+        public PGPContext()
+        { }
+
+        public PGPContext(Node lambda)
+        {
+            _lambda = lambda ?? throw new ArgumentNullException(nameof(lambda));
+        }
+
         protected override string GetPasswordForKey(PgpSecretKey key)
         {
             throw new System.NotImplementedException();
@@ -93,6 +105,26 @@ namespace magic.lambda.mime.helpers
         public override Task<DigitalSignatureCollection> VerifyAsync(Stream content, Stream signatureData, CancellationToken cancellationToken = default)
         {
             return base.VerifyAsync(content, signatureData, cancellationToken);
+        }
+
+        public override void Import(PgpPublicKeyRing keyring)
+        {
+            base.Import(keyring);
+        }
+
+        public override void Import(PgpPublicKeyRingBundle bundle)
+        {
+            base.Import(bundle);
+        }
+
+        public override void Import(PgpSecretKeyRing keyring)
+        {
+            base.Import(keyring);
+        }
+
+        public override void Import(PgpSecretKeyRingBundle bundle)
+        {
+            base.Import(bundle);
         }
     }
 }

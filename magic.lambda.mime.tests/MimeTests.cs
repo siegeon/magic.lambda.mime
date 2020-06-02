@@ -58,136 +58,73 @@ this is another body text
         }
 
         [Fact]
-        public void ParseSignedMessage()
+        public void ImportPgpKeyPair()
         {
-            string mimeMessage = @"Return-Path: <thomas@gaiasoul.com>
-Received: from [192.168.0.28] ([213.140.201.154])
-        by smtp.gmail.com with ESMTPSA id l131sm6488464wmb.5.2017.08.24.08.54.51
-        for <asgeir@dagligdata.no>
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Thu, 24 Aug 2017 08:54:52 -0700 (PDT)
-From: Thomas Hansen <thomas@gaiasoul.com>
-Date: Thu, 24 Aug 2017 18:54:51 +0300
-Subject: Pressemelding - Velkommen til mitt hjem
-Message-Id: <22M5Z6M462U4.DD26BQA3Q92I1@ubuntu>
-To: ""Asgeir Høgli"" <asgeir@dagligdata.no>
-MIME-Version: 1.0
-Content-Type: multipart/signed; boundary=""=-70CJRx+kzBN9hWTAOosSdQ==""; protocol=""application/pgp-signature""; micalg=pgp-sha256
+            string mimeMessage = @"-----BEGIN PGP PRIVATE KEY BLOCK-----
 
---=-70CJRx+kzBN9hWTAOosSdQ==
-Content-Type: multipart/alternative; boundary=""=-ZbhtG5e/mW81PPRARfJYbw==""
-
---=-ZbhtG5e/mW81PPRARfJYbw==
-Content-Type: text/plain
-X-Type: markdown
-Content-Transfer-Encoding: quoted-printable
-
-Heisann Asgeir, jeg la deg opp p=C3=A5 denne ogs=C3=A5, slik at du kan se e=
-tt eksempel p=C3=A5 hva jeg kan gj=C3=B8re ... :)
-
-Lenken under her, leder faktisk inn i mitt hjem. Der har jeg satt opp en Li=
-nux server, som fungerer som min personlige hjemme cloud. Derifra kan jeg l=
-ese eposten min, gjennom webmail interface, likevel ved bruk av ende til en=
-de PGP kryptering. P=C3=A5 toppen er det installert ett SSL certifikat, som=
- gj=C3=B8r all aksess til serveren kryptert og sikker. Hvilke vil si at jeg=
- kan lese eposten min, kryptert, over for eksempel en iPhone eller iPad, fr=
-a uansett hvor jeg m=C3=A5tte befinne meg i verden. Med mindre det kommer e=
-tt str=C3=B8mbrudd, ol, i huset der jeg bor.
-
-https://home.gaiasoul.com/welcome
-
-Det tar meg ca. 30 minutter =C3=A5 sette opp en lignende konfigurasjon, for=
- bedriftskunder med flere ansatte litt lengre tid (selvf=C3=B8lgelig). I ti=
-llegg har jeg laget ett script, som setter opp hele systemet, nesten 100% a=
-utomatisert. En IT-kyndig person kan sikkert installere sin egen server sli=
-k, i l=C3=B8pet av 30 minutter.
-
-Serveren dere bes=C3=B8ker, er en gammel utrangert laptop, som er konverter=
-t til en Ubuntu Server, som kj=C3=B8rer Apache, Linux, MySQL og Mono. =C3=
-=98verst har jeg installert Phosphorus Five, som er mitt eget-utviklete web=
- operativsystem, som er ekstremt modulbasert. Phosphorus Five er utviklet i=
- C# og ASP.NET.
-
-Jeg har en helt vanlig standard internett tilkobling, fra en av de mer popu=
-l=C3=A6re internett leverand=C3=B8rene som finnes p=C3=A5 Kypros.
-
-Det er (naturligvis) litt ""lag"" i nettverket, men jeg har testet det ekster=
-nt, og selv i fra land som S=C3=B8r Afrika ol, s=C3=A5 loader hjemme web se=
-rveren min sidene p=C3=A5 1-3 sekunder.
-
-Hele sulamitten er Fri Programvare og =C3=85pen Kildekode. Jeg er selvf=C3=
-=B8lgelig disponibel til intervju, ol.
-
-
-Ha en fin dag :)
-
-Thomas Hansen
-
---=20
-Got Privacy ...?
-
-https://gaiasoul.com/got-privacy
---=-ZbhtG5e/mW81PPRARfJYbw==
-Content-Type: text/html
-Content-Transfer-Encoding: quoted-printable
-
-<html><head><title>Email</title></head><body><div><p>Heisann Asgeir, jeg la=
- deg opp p=C3=A5 denne ogs=C3=A5, slik at du kan se ett eksempel p=C3=A5 hv=
-a jeg kan gj=C3=B8re ... :)</p><p>Lenken under her, leder faktisk inn i mit=
-t hjem. Der har jeg satt opp en Linux server, som fungerer som min personli=
-ge hjemme cloud. Derifra kan jeg lese eposten min, gjennom webmail interfac=
-e, likevel ved bruk av ende til ende PGP kryptering. P=C3=A5 toppen er det =
-installert ett SSL certifikat, som gj=C3=B8r all aksess til serveren krypte=
-rt og sikker. Hvilke vil si at jeg kan lese eposten min, kryptert, over for=
- eksempel en iPhone eller iPad, fra uansett hvor jeg m=C3=A5tte befinne meg=
- i verden. Med mindre det kommer ett str=C3=B8mbrudd, ol, i huset der jeg b=
-or.</p><p><a target=3D'_blank' href=3D'https://home.gaiasoul.com/welcome'><=
-strong>home.gaiasoul.com</strong>/welcome</a></p><p>Det tar meg ca. 30 minu=
-tter =C3=A5 sette opp en lignende konfigurasjon, for bedriftskunder med fle=
-re ansatte litt lengre tid (selvf=C3=B8lgelig). I tillegg har jeg laget ett=
- script, som setter opp hele systemet, nesten 100% automatisert. En IT-kynd=
-ig person kan sikkert installere sin egen server slik, i l=C3=B8pet av 30 m=
-inutter.</p><p>Serveren dere bes=C3=B8ker, er en gammel utrangert laptop, s=
-om er konvertert til en Ubuntu Server, som kj=C3=B8rer Apache, Linux, MySQL=
- og Mono. =C3=98verst har jeg installert Phosphorus Five, som er mitt eget-=
-utviklete web operativsystem, som er ekstremt modulbasert. Phosphorus Five =
-er utviklet i C# og ASP.NET.</p><p>Jeg har en helt vanlig standard internet=
-t tilkobling, fra en av de mer popul=C3=A6re internett leverand=C3=B8rene s=
-om finnes p=C3=A5 Kypros.</p><p>Det er (naturligvis) litt ""lag"" i nettverke=
-t, men jeg har testet det eksternt, og selv i fra land som S=C3=B8r Afrika =
-ol, s=C3=A5 loader hjemme web serveren min sidene p=C3=A5 1-3 sekunder.</p>=
-<p>Hele sulamitten er Fri Programvare og =C3=85pen Kildekode. Jeg er selvf=
-=C3=B8lgelig disponibel til intervju, ol.</p><p>Ha en fin dag :)</p><p>Thom=
-as Hansen</p><pre style=3D""opacity:.3;"">--=20
-Got Privacy ...?
-<a target=3D'_blank' href=3D'https://gaiasoul.com/got-privacy'><strong>gaia=
-soul.com</strong>/got-privacy</a></pre></div></body></html>
---=-ZbhtG5e/mW81PPRARfJYbw==--
---=-70CJRx+kzBN9hWTAOosSdQ==
-Content-Type: application/pgp-signature; name=signature.pgp
-Content-Disposition: attachment; filename=signature.pgp
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP MESSAGE-----
-Version: BCPG C# v1.8.1.0
-
-owJ4nAEfAuD9iQIcBAEBCAAGBQJZnvbLAAoJEK7Z0E9DviqtVWkP/jtHd6ChIasC
-4mp40QawLKw5v9EiWjJHWeK+u3Z4dULUFucJ3t3Ge5WkaNQE112pDH3Fv6LzgivY
-FEqo6YVIodmrBNBIN/6rS8wevrHOgz0bOKnmmN9VjOB0pIIZwmvgl5eEs2ruLIK6
-F0gt8UEc9ezOn74k2cl2TmRbk3qrmXiCoyIDeYdUPB03l25cXHLmfjKzKxOS5tVB
-kGFU2QpiHcR2P7ByPFuf/saIfd15SdfchiXwAKAqVVEm/EcF9EV6H2BthWkwYwm2
-BgVW6+gYm6VL1QkX+NtOrW47rhHVTv0GHYagVeVB88nqSY+azNjxonuujwgZLzYk
-qmJzFQ04sdeyMYF2w/GwP1OH5naspmx31zTqyF4Wy4CjYO8ZqsO3+5Mr3d9XOKCI
-QcxBrESoic6waAVaJvZgDiV7WMe1saiS9IgzZoyV4CIYh0V4iAlbju942t0MuMdj
-4Le4AOw7YRH4CyjeA+oYaRVRUrxWIlZvYG6+/IpLS3HEN3AYh0NKXfK1z5Alqoti
-MKEdxHWB/K/+BMihaNz7eEpHQ4nO/u4v3kIT/+eW8m7Pb69zWcc3fOkbTbfHwJ/B
-gVULq0UEz2OVBeWRtawr7BsWyXPeyfHve419lFICsoawpAKYcCmK5RhwtAlFBUBY
-0DXlKRAdpsdU7Y9v5rvt3VBTfaKUAacUSsEK1Q==
-=vgcR
------END PGP MESSAGE-----
-
---=-70CJRx+kzBN9hWTAOosSdQ==--";
-            var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
+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
+=eoY4
+-----END PGP PRIVATE KEY BLOCK-----";
+            var lambda = Common.Evaluate(@"
+.data
+pgp.import:@""" + mimeMessage + @"""
+   .lambda
+      set-value:x:@.data
+         get-value:x:@.key");
         }
 
         [Fact]
