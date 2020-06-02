@@ -221,6 +221,7 @@ namespace magic.lambda.mime.helpers
             using (var ctx = new PgpContext())
             {
                 return MultipartEncrypted.Encrypt(
+                    ctx,
                     new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(key) },
                     entity);
             }

@@ -30,10 +30,10 @@ namespace magic.lambda.mime
             {
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
                 {
-                    var message = MimeMessage.Load(stream);
+                    var message = MimeEntity.Load(stream);
                     helpers.MimeParser.Parse(
                         input,
-                        message.Body,
+                        message,
                         input.Children.FirstOrDefault(x => x.Name == "key")?.GetEx<string>(),
                         input.Children.FirstOrDefault(x => x.Name == "key")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>());
                     input.Value = null;
