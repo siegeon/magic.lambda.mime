@@ -11,6 +11,7 @@ using MimeKit.IO;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
+using MimeKit.Cryptography;
 
 namespace magic.lambda.mime.helpers
 {
@@ -78,6 +79,12 @@ namespace magic.lambda.mime.helpers
                 case "multipart":
                     result = CreateMultipart(signaler, subType, input);
                     break;
+            }
+            var signingKey = input.Children.FirstOrDefault(x => x.Name == "sign")?.GetEx<string>();
+            if (!string.IsNullOrEmpty(signingKey))
+            {
+                // Signing entity.
+                result = Sign(result, signingKey);
             }
             return result;
         }
@@ -192,6 +199,19 @@ namespace magic.lambda.mime.helpers
             {
                 entity.Headers.Replace(idx.Name, idx.GetEx<string>());
             }
+        }
+
+        static MultipartSigned Sign(MimeEntity entity, string key)
+        {
+            /*
+             * Figuring out signature Digest Algorithm to use for signature, defaulting to SHA256.
+             * SHA256 should be safe, since there are no known collision weaknesses in it.
+             * Therefor we default to SHA256, unlesss caller explicitly tells us he wants to use another algorithm.
+             */
+            var algo = DigestAlgorithm.Sha256;
+
+            // Signing content of email and returning to caller.
+            return MultipartSigned.Create(PgpHelpers.GetKeyFromAsciiArmored(key), algo, entity);
         }
 
         #endregion

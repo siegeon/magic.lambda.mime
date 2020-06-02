@@ -52,7 +52,7 @@ Vlw0KvRqBVBcqWr29a4QydWFZmfBs0C9GiFNcIo3zkEsf4MQFRIPAXbeMA==
 =X3uP
 -----END PGP PUBLIC KEY BLOCK-----";
 
-        const string SECRET_KEY = @"-----BEGIN PGP PRIVATE KEY BLOCK-----
+        const string PRIVATE_KEYPAIR = @"-----BEGIN PGP PRIVATE KEY BLOCK-----
 
 lQPGBF7V98IBCADE5IzvcgltfoDIU60ahHpfdjiht1ja+vIyCsq/N2BAa0JAItOM
 a/1tUux+2bSuaHc8e4c8VKUJvS5KJC1ElmoISnFnvpNSb/xTPsga2auP8IsptWRU
@@ -113,6 +113,42 @@ FeFWXDQq9GoFUFypavb1rhDJ1YVmZ8GzQL0aIU1wijfOQSx/gxAVEg8Bdt4w
 -----END PGP PRIVATE KEY BLOCK-----
 ";
 
+        const string SECRET_KEY = @"-----BEGIN PGP PRIVATE KEY BLOCK-----
+Version: BCPG C# v1.8.5.0
+
+lQPGBF7V98IBCADE5IzvcgltfoDIU60ahHpfdjiht1ja+vIyCsq/N2BAa0JAItOM
+a/1tUux+2bSuaHc8e4c8VKUJvS5KJC1ElmoISnFnvpNSb/xTPsga2auP8IsptWRU
+BWXIGRoztFUoK22le4KaKQDJL+Icrqi31DKo0TGgg628EOa0SlR8YPGctpqQ54Bi
+FCg123bD1X8UL6QG1xS8KuXbTbzWHNOGisa8d+7mSxcnLlwliJBNCCGBxD+zwuus
+5+hXIVI1OllApmUggoxDnqukpA6agOneISnEzX1teoBwBnUDUZLt4lcsTRr0OzrQ
+QDIxZPCcBT0FUkFXBTCRxzyHi+WF9btpfYpTABEBAAH+BwMCD134G9vjOSHOhk2f
+t3TeXjNvMtRdJuagqvSBubYdbC1zzb/O6fitxXbouNTJaoJnNa4y+IC2PUeJPHF/
+x2PqFZRBts2KU1oSGyWy+nM5EsVa7FN/5SDhIgshw1eHlc+dLxeyXIFDxJ8ZUKhu
+LAvjOyLN4dx0+VLj9wGQfXtjCdK2O6n3Sxvnwr31YI7XKj6HeEFMzA/b6LF8ZetM
+D+h3V6B+fDIrtKN5QTVkZ4hGBbwjAZVpqxviC24cmZl4EVtarJQcQwVxF4CSbpHN
+3Wmzer9+zuPvOa8KBJUsM2+ttXsFamUkp7Tgi7mpfYB7BJ1WYTYJn5X91pCvmhms
+15spfiuy59o/UR7kw+P4h0Ssc9cN1rYahh3RSOet8+nsDy+Z3gWxQJHvyM0i8t3H
+VDPQMLtrvs/Jn9VRE+rrc9hIJRSG06MVoEa/mS1wK8X3r3nm4qAEeK8E11dI05SM
+U7lgXQwK2PHg5D5XiVTCNUYxeeUipXbfkIXcY+a1QJA0nyiVWGTlbtHk0MCGO2a9
+g99MuLTPxA1BUaN4lAx/5yd/jNnSMEwHMANdjFMGjoEJ9rPRPvPv4x8TiEZ7vXEJ
+wddgg+GUlmpLk564rrDqdEE6+QJI1Tg7sysv8qgrTR18WFDw6Nt4ms+dubCpDTNc
+0fhTjCGkH9uPuErCDVMSSTcd5154GVOCOKn4QiEz0sR3Hr3AIS22kb1s+3GrGDrN
+O5uKnRRSIMB6WqguFtSHNy+RhMy9/9/lsvnTk8ME/fgEL1YN1JRF5L2nN2rdDCTT
+igknWz33kWRAStnxcbyoQmb9fmg+XlT116NWu4fakqGiDsV9g6tyDG9sDP5r9NV0
+RaOH5FTZ8fabq+aWyg9ACsl1v8WWkqIHmyQTm+rNDKtElsdqx/2iIarjzAENL2ob
+m9nLMScfBjDXtCNUaG9tYXMgSGFuc2VuIDx0aG9tYXNAZ2FpYXNvdWwuY29tPokB
+VAQTAQgAPhYhBEY+CBgYbdtr+EbSJJKsJQxJy+r5BQJe1ffCAhsDBQkDwoROBQsJ
+CAcCBhUKCQgLAgQWAgMBAh4BAheAAAoJEJKsJQxJy+r5XzcH/1MFUKV6GPfLQHhx
+hbZTvUhxxVAnc27H57d8twqfiZlKeOTvdKfUKVTb1qOCvWirOQxznj3RHXF7gAt7
+WmcURYRZkHvUXUa45dH3BKGnrl9wE37AO2uysADojJe0HrAD2OEpZ+KQgEX4ezcB
+QPeKxsvBw5N42t4/JBUUfuHJPKUWIs8Dq6DchXDvGBoL7PBAQehQh7FgK/M+Whgd
+o5fQBh+uLyBRIntW766tb+F0QUv7ksyC9GOEXBd1aIR8iNCKlwGkqOKDSj7K+D1Z
+k6gGo7VqAZDEkYY4IptZ3qGDUXV3pkTbpc2NTx1B8/Fih8ck6huCSSTBTUE4ygfi
+Nx92FnQ=
+=fqsf
+-----END PGP PRIVATE KEY BLOCK-----
+";
+
         [Fact]
         public void ImportPgpPublicKey()
         {
@@ -156,7 +192,7 @@ pgp.keys.public.import:@""" + PUBLIC_KEY + @"""
         {
             var lambda = Common.Evaluate(@"
 .keys
-pgp.keys.private.import:@""" + SECRET_KEY + @"""
+pgp.keys.private.import:@""" + PRIVATE_KEYPAIR + @"""
    .lambda
       add:x:@.keys
          get-nodes:x:@.key");
@@ -166,6 +202,7 @@ pgp.keys.private.import:@""" + SECRET_KEY + @"""
 
             // Checking first key
             Assert.Equal("463E0818186DDB6BF846D22492AC250C49CBEAF9", data.Children.First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.True(data.Children.First().Children.First(x => x.Name == "private").Get<bool>());
             Assert.Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----", data.Children.First().Children.First(x => x.Name == "content").Get<string>());
             Assert.True(data.Children.First().Children.First(x => x.Name == "is-master").Get<bool>());
             Assert.True(data.Children.First().Children.First(x => x.Name == "is-signing-key").Get<bool>());
@@ -174,6 +211,7 @@ pgp.keys.private.import:@""" + SECRET_KEY + @"""
 
             // Checking second key
             Assert.Equal("686C520F02716F59C9694AFE5A95B76FEC21441C", data.Children.Skip(1).First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.True(data.Children.Skip(1).First().Children.First(x => x.Name == "private").Get<bool>());
             Assert.Contains("-----BEGIN PGP MESSAGE-----", data.Children.Skip(1).First().Children.First(x => x.Name == "content").Get<string>());
             Assert.False(data.Children.Skip(1).First().Children.First(x => x.Name == "is-master").Get<bool>());
             Assert.True(data.Children.Skip(1).First().Children.First(x => x.Name == "is-signing-key").Get<bool>());
@@ -182,6 +220,7 @@ pgp.keys.private.import:@""" + SECRET_KEY + @"""
 
             // Checking public key for master key
             Assert.Equal("463E0818186DDB6BF846D22492AC250C49CBEAF9", data.Children.Skip(2).First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.False(data.Children.Skip(2).First().Children.First(x => x.Name == "private").Get<bool>());
             Assert.Contains("-----BEGIN PGP PUBLIC KEY BLOCK-----", data.Children.Skip(2).First().Children.First(x => x.Name == "content").Get<string>());
             Assert.Equal(typeof(DateTime), data.Children.Skip(2).First().Children.First(x => x.Name == "created").Value.GetType());
             Assert.True(data.Children.Skip(2).First().Children.First(x => x.Name == "valid-seconds").Get<long>() > 1000);
@@ -191,6 +230,20 @@ pgp.keys.private.import:@""" + SECRET_KEY + @"""
             Assert.True(data.Children.Skip(2).First().Children.First(x => x.Name == "is-master").Get<bool>());
             Assert.False(data.Children.Skip(2).First().Children.First(x => x.Name == "is-revoked").Get<bool>());
             Assert.Contains("Thomas Hansen <thomas@gaiasoul.com>", data.Children.Skip(2).First().Children.First(x => x.Name == "ids").Children.First().Get<string>());
+        }
+
+        [Fact]
+        public void SignMimeMessage()
+        {
+            var lambda = Common.Evaluate(string.Format(@"
+.key:@""{0}""
+mime.create
+   entity:text/plain
+      sign:x:@.key
+      content:Foo bar
+", SECRET_KEY));
+            var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
+            Assert.Single(entity.Children);
         }
     }
 }
