@@ -67,6 +67,39 @@ namespace magic.lambda.mime
                         lambda.Clear();
                         lambda.AddRange(exe.Children.ToList());
                     }
+
+                    // Then doing public key for master key
+                    var publicKey = key.GetPublicKey();
+                    if (publicKey != null)
+                    {
+                        // Parametrizing [.lambda] callback with key and data.
+                        var keyNode = new Node(".key");
+                        keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(publicKey)));
+                        keyNode.Add(new Node("content", PgpHelpers.GetKey(publicKey)));
+                        keyNode.Add(new Node("created", publicKey.CreationTime));
+                        keyNode.Add(new Node("valid-seconds", publicKey.GetValidSeconds()));
+                        keyNode.Add(new Node("algorithm", publicKey.Algorithm.ToString()));
+                        keyNode.Add(new Node("bit-strength", publicKey.BitStrength));
+                        keyNode.Add(new Node("is-encryption", publicKey.IsEncryptionKey));
+                        keyNode.Add(new Node("is-master", publicKey.IsMasterKey));
+                        keyNode.Add(new Node("is-revoked", publicKey.IsRevoked()));
+
+                        // Adding ID for key.
+                        var ids = new Node("ids");
+                        foreach (var idxId in publicKey.GetUserIds())
+                        {
+                            ids.Add(new Node(".", idxId.ToString()));
+                        }
+                        if (ids.Children.Any())
+                            keyNode.Add(ids);
+
+                        // Invoking [.lambda] making sure we reset it after evaluation.
+                        var exe = lambda.Clone();
+                        lambda.Insert(0, keyNode);
+                        signaler.Signal("eval", lambda);
+                        lambda.Clear();
+                        lambda.AddRange(exe.Children.ToList());
+                    }
                 }
             }
         }
