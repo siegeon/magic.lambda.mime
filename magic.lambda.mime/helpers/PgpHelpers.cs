@@ -18,8 +18,8 @@ namespace magic.lambda.mime.helpers
         /// <summary>
         /// Returns the fingerprint for specified public PGP key.
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <param name="key">Key to retrieve fingerprint of.</param>
+        /// <returns>Fingerprint of specified public key.</returns>
         public static string GetFingerprint(PgpPublicKey key)
         {
             var builder = new StringBuilder();
