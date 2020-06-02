@@ -240,10 +240,13 @@ pgp.keys.private.import:@""" + PRIVATE_KEYPAIR + @"""
 mime.create
    entity:text/plain
       sign:x:@.key
+         password:8pr4ms
       content:Foo bar
 ", SECRET_KEY));
             var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
-            Assert.Single(entity.Children);
+            Assert.Empty(entity.Children);
+            Assert.Contains(@"-----END PGP MESSAGE-----", entity.Get<string>());
+            Assert.Contains(@"protocol=""application/pgp-signature""; micalg=pgp-sha256", entity.Get<string>());
         }
     }
 }

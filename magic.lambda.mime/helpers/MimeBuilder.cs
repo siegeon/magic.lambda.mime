@@ -81,11 +81,9 @@ namespace magic.lambda.mime.helpers
                     break;
             }
             var signingKey = input.Children.FirstOrDefault(x => x.Name == "sign")?.GetEx<string>();
+            var signingKeyPassword = input.Children.FirstOrDefault(x => x.Name == "sign")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>();
             if (!string.IsNullOrEmpty(signingKey))
-            {
-                // Signing entity.
-                result = Sign(result, signingKey);
-            }
+                result = Sign(result, signingKey, signingKeyPassword); // Signing entity.
             return result;
         }
 
@@ -201,7 +199,7 @@ namespace magic.lambda.mime.helpers
             }
         }
 
-        static MultipartSigned Sign(MimeEntity entity, string key)
+        static MultipartSigned Sign(MimeEntity entity, string key, string password)
         {
             /*
              * Figuring out signature Digest Algorithm to use for signature, defaulting to SHA256.
@@ -211,7 +209,14 @@ namespace magic.lambda.mime.helpers
             var algo = DigestAlgorithm.Sha256;
 
             // Signing content of email and returning to caller.
-            return MultipartSigned.Create(PgpHelpers.GetKeyFromAsciiArmored(key), algo, entity);
+            using (var ctx = new PgpContext { Password = password })
+            {
+                return MultipartSigned.Create(
+                    ctx,
+                    PgpHelpers.GetKeyFromAsciiArmored(key),
+                    algo,
+                    entity);
+            }
         }
 
         #endregion
