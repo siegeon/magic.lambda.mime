@@ -19,18 +19,6 @@ namespace magic.lambda.mime.helpers
 {
     public class PGPContext : OpenPgpContext
     {
-        readonly ISignaler _signaler;
-
-        public PGPContext()
-        { }
-
-        public PGPContext(ISignaler signaler)
-        {
-            _signaler = signaler ?? throw new ArgumentNullException(nameof(signaler));
-        }
-
-        public Node ImportPrivateLambda { get; set; }
-
         protected override string GetPasswordForKey(PgpSecretKey key)
         {
             throw new NotImplementedException();
@@ -125,21 +113,7 @@ namespace magic.lambda.mime.helpers
 
         public override void Import(PgpSecretKeyRing keyring)
         {
-            var clone = ImportPrivateLambda.Clone();
-            var keyNode = new Node(".key");
-            var fingerprint = new StringBuilder();
-
-            var data = keyring.GetPublicKey().GetFingerprint();
-            for (int idx = 0; idx < data.Length; idx++)
-            {
-                fingerprint.Append(data[idx].ToString("x2"));
-                if (idx % 2 != 0)
-                    fingerprint.Append("-");
-            }
-
-            keyNode.Add(new Node("fingerprint", fingerprint.ToString().TrimEnd('-')));
-            clone.Insert(0, keyNode);
-            _signaler.Signal("eval", clone);
+            base.Import(keyring);
         }
 
         public override void Import(PgpSecretKeyRingBundle bundle)
