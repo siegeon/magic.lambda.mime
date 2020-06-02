@@ -3,7 +3,6 @@
  * See the enclosed LICENSE file for details.
  */
 
-using MimeKit.Cryptography;
 using magic.node;
 using magic.signals.contracts;
 using magic.lambda.mime.helpers;
