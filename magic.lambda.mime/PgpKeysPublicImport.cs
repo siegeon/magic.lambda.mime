@@ -43,36 +43,48 @@ namespace magic.lambda.mime
                     var key = new PgpPublicKeyRing(armored);
                     foreach (PgpPublicKey idxKey in key.GetPublicKeys())
                     {
-                        // Parametrizing [.lambda] callback with key and data.
-                        var keyNode = new Node(".key");
-                        keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(idxKey)));
-                        keyNode.Add(new Node("content", PgpHelpers.GetKey(idxKey)));
-                        keyNode.Add(new Node("created", idxKey.CreationTime));
-                        keyNode.Add(new Node("valid-seconds", idxKey.GetValidSeconds()));
-                        keyNode.Add(new Node("algorithm", idxKey.Algorithm.ToString()));
-                        keyNode.Add(new Node("bit-strength", idxKey.BitStrength));
-                        keyNode.Add(new Node("is-encryption", idxKey.IsEncryptionKey));
-                        keyNode.Add(new Node("is-master", idxKey.IsMasterKey));
-                        keyNode.Add(new Node("is-revoked", idxKey.IsRevoked()));
-
-                        // Adding ID for key.
-                        var ids = new Node("ids");
-                        foreach (var idxId in idxKey.GetUserIds())
-                        {
-                            ids.Add(new Node(".", idxId.ToString()));
-                        }
-                        if (ids.Children.Any())
-                            keyNode.Add(ids);
-
-                        // Invoking [.lambda] making sure we reset it after evaluation.
-                        var exe = lambda.Clone();
-                        lambda.Insert(0, keyNode);
-                        signaler.Signal("eval", lambda);
-                        lambda.Clear();
-                        lambda.AddRange(exe.Children.ToList());
+                        InvokeLambda(signaler, lambda, idxKey);
                     }
                 }
             }
         }
+
+        #region [ -- Private and internal herlper methods -- ]
+
+        internal static void InvokeLambda(
+            ISignaler signaler,
+            Node lambda,
+            PgpPublicKey key)
+        {
+            // Parametrizing [.lambda] callback with key and data.
+            var keyNode = new Node(".key");
+            keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(key)));
+            keyNode.Add(new Node("content", PgpHelpers.GetKey(key)));
+            keyNode.Add(new Node("created", key.CreationTime));
+            keyNode.Add(new Node("valid-seconds", key.GetValidSeconds()));
+            keyNode.Add(new Node("algorithm", key.Algorithm.ToString()));
+            keyNode.Add(new Node("bit-strength", key.BitStrength));
+            keyNode.Add(new Node("is-encryption", key.IsEncryptionKey));
+            keyNode.Add(new Node("is-master", key.IsMasterKey));
+            keyNode.Add(new Node("is-revoked", key.IsRevoked()));
+
+            // Adding ID for key.
+            var ids = new Node("ids");
+            foreach (var idxId in key.GetUserIds())
+            {
+                ids.Add(new Node(".", idxId.ToString()));
+            }
+            if (ids.Children.Any())
+                keyNode.Add(ids);
+
+            // Invoking [.lambda] making sure we reset it after evaluation.
+            var exe = lambda.Clone();
+            lambda.Insert(0, keyNode);
+            signaler.Signal("eval", lambda);
+            lambda.Clear();
+            lambda.AddRange(exe.Children.ToList());
+        }
+
+        #endregion
     }
 }
