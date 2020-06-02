@@ -20,10 +20,10 @@ namespace magic.lambda.mime
     /// <summary>
     /// Parses a MIME message and returns its as a hierarchical object of lambda to caller.
     /// </summary>
-    [Slot(Name = "pgp.public.import")]
-    public class PgpPublicImport : ISlot
+    [Slot(Name = "pgp.keys.public.import")]
+    public class PgpKeysPublicImport : ISlot
     {
-        static PgpPublicImport()
+        static PgpKeysPublicImport()
         {
             CryptographyContext.Register(typeof(PGPContext));
         }
@@ -37,9 +37,9 @@ namespace magic.lambda.mime
         {
             // Sanity checking invocation.
             var keyPlainText = input.GetEx<string>() ?? 
-                throw new ArgumentNullException("No value provided to [pgp.public.import]");
+                throw new ArgumentNullException("No value provided to [pgp.keys.public.import]");
             var lambda = input.Children.FirstOrDefault(x => x.Name == ".lambda") ??
-                throw new ArgumentNullException("No [.lambda] provided to [pgp.public.import]");
+                throw new ArgumentNullException("No [.lambda] provided to [pgp.keys.public.import]");
 
             // Unwrapping key(s) and iterating through them, importing them one at the time.
             using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(keyPlainText)))
