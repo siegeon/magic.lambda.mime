@@ -9,6 +9,8 @@ using MimeKit;
 using MimeKit.IO;
 using MimeKit.Cryptography;
 using magic.node;
+using System;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace magic.lambda.mime.helpers
 {
@@ -25,8 +27,38 @@ namespace magic.lambda.mime.helpers
         public static void Parse(
             Node node,
             MimeEntity entity,
-            string key,
-            string password)
+            Func<string> keyFunc,
+            Func<PgpSecretKey, string> passwordFunc)
+        {
+            ParseImplementation(node, entity, keyFunc, passwordFunc);
+        }
+
+        /// <summary>
+        /// Helper method to dispose a MimeEntity's streams.
+        /// </summary>
+        /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
+        public static void Dispose(MimeEntity entity)
+        {
+            if (entity is MimePart part)
+            {
+                part.Content?.Stream?.Dispose();
+            }
+            else if (entity is Multipart multi)
+            {
+                foreach (var idx in multi)
+                {
+                    Dispose(idx);
+                }
+            }
+        }
+
+        #region [ -- Private helper methods -- ]
+
+        private static void ParseImplementation(
+            Node node,
+            MimeEntity entity,
+            Func<string> keyFunc,
+            Func<PgpSecretKey, string> passwordFunc)
         {
             var tmp = new Node("entity", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
@@ -46,17 +78,17 @@ namespace magic.lambda.mime.helpers
                 // Then traversing content of multipart/signed message.
                 foreach (var idx in signed)
                 {
-                    Parse(tmp, idx, key, password);
+                    ParseImplementation(tmp, idx, keyFunc, passwordFunc);
                 }
             }
             else if (entity is MultipartEncrypted enc)
             {
-                var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(key);
-                using (var ctx = new PgpContext { Password = password, SecretKeyRings = secretKey })
+                var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(keyFunc());
+                using (var ctx = new PgpContext { Password = passwordFunc(secretKey.GetSecretKey()), SecretKeyRings = secretKey })
                 {
                     var decryptedEntity = enc.Decrypt(ctx);
                     tmp.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(secretKey.GetPublicKey())));
-                    Parse(tmp, decryptedEntity, key, password);
+                    ParseImplementation(tmp, decryptedEntity, keyFunc, passwordFunc);
                 }
             }
             else if (entity is Multipart multi)
@@ -64,7 +96,7 @@ namespace magic.lambda.mime.helpers
                 // Multipart content.
                 foreach (var idx in multi)
                 {
-                    Parse(tmp, idx, key, password);
+                    ParseImplementation(tmp, idx, keyFunc, passwordFunc);
                 }
             }
             else if (entity is TextPart text)
@@ -89,27 +121,6 @@ namespace magic.lambda.mime.helpers
             }
             node.Add(tmp);
         }
-
-        /// <summary>
-        /// Helper method to dispose a MimeEntity's streams.
-        /// </summary>
-        /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
-        public static void Dispose(MimeEntity entity)
-        {
-            if (entity is MimePart part)
-            {
-                part.Content?.Stream?.Dispose();
-            }
-            else if (entity is Multipart multi)
-            {
-                foreach (var idx in multi)
-                {
-                    Dispose(idx);
-                }
-            }
-        }
-
-        #region [ -- Private helper methods -- ]
 
         /*
          * Process MIME entity's headers, and adds up into node collection.

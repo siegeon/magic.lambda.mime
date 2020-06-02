@@ -34,8 +34,8 @@ namespace magic.lambda.mime
                     helpers.MimeParser.Parse(
                         input,
                         message,
-                        input.Children.FirstOrDefault(x => x.Name == "key")?.GetEx<string>(),
-                        input.Children.FirstOrDefault(x => x.Name == "key")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>());
+                        () => input.Children.FirstOrDefault(x => x.Name == "key")?.GetEx<string>(),
+                        (sec) => input.Children.FirstOrDefault(x => x.Name == "key")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>());
                     input.Value = null;
                 }
             }
