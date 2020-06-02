@@ -10,8 +10,16 @@ using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace magic.lambda.mime.helpers
 {
+    /// <summary>
+    /// Helper class for PGP parts of Magic and its MIME helpers.
+    /// </summary>
     public static class PgpHelpers
     {
+        /// <summary>
+        /// Returns the fingerprint for specified public PGP key.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public static string GetFingerprint(PgpPublicKey key)
         {
             var builder = new StringBuilder();
@@ -23,7 +31,12 @@ namespace magic.lambda.mime.helpers
             return builder.ToString().ToUpperInvariant();
         }
 
-        public static string GetKey(PgpPublicKey key)
+        /// <summary>
+        /// Returns actual public PGP key, in armored ASCII format.
+        /// </summary>
+        /// <param name="key">Key to retrieve.</param>
+        /// <returns>Armored ASCII format representing public key</returns>
+        public static string GetAsciiArmoredPublicKey(PgpPublicKey key)
         {
             using (var memStream = new MemoryStream())
             {
@@ -41,7 +54,12 @@ namespace magic.lambda.mime.helpers
             }
         }
 
-        public static string GetKey(PgpSecretKey key)
+        /// <summary>
+        /// Returns actual secret key, in armored ASCII format.
+        /// </summary>
+        /// <param name="key">Key to retrieve.</param>
+        /// <returns>Armored ASCII format representing private key.</returns>
+        public static string GetAsciiArmoredSecretKey(PgpSecretKey key)
         {
             using (var memStream = new MemoryStream())
             {

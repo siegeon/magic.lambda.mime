@@ -59,7 +59,7 @@ namespace magic.lambda.mime
             // Parametrizing [.lambda] callback with key and data.
             var keyNode = new Node(".key");
             keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(key)));
-            keyNode.Add(new Node("content", PgpHelpers.GetKey(key)));
+            keyNode.Add(new Node("content", PgpHelpers.GetAsciiArmoredPublicKey(key)));
             keyNode.Add(new Node("created", key.CreationTime));
             keyNode.Add(new Node("valid-seconds", key.GetValidSeconds()));
             keyNode.Add(new Node("algorithm", key.Algorithm.ToString()));

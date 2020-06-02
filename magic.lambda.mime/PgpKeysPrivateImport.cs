@@ -17,7 +17,8 @@ using magic.lambda.mime.helpers;
 namespace magic.lambda.mime
 {
     /// <summary>
-    /// Imports a public PGP key ring, which often is a master key, in addition to its sub keys.
+    /// Imports a private PGP key ring, which often is a master key, in addition to its sub keys,
+    /// and the public key for the master key. Typically returns 3 keys in total.
     /// </summary>
     [Slot(Name = "pgp.keys.private.import")]
     public class PgpKeysPrivateImport : ISlot
@@ -56,12 +57,15 @@ namespace magic.lambda.mime
 
         #region [ -- Private and internal helper methods -- ]
 
-        internal static void InvokeLambda(ISignaler signaler, Node lambda, PgpSecretKey idxKey)
+        internal static void InvokeLambda(
+            ISignaler signaler,
+            Node lambda,
+            PgpSecretKey idxKey)
         {
             // Parametrizing [.lambda] callback with key and data.
             var keyNode = new Node(".key");
             keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(idxKey.PublicKey)));
-            keyNode.Add(new Node("content", PgpHelpers.GetKey(idxKey)));
+            keyNode.Add(new Node("content", PgpHelpers.GetAsciiArmoredSecretKey(idxKey)));
             keyNode.Add(new Node("is-master", idxKey.IsMasterKey));
             keyNode.Add(new Node("is-signing-key", idxKey.IsSigningKey));
             keyNode.Add(new Node("encryption-algorithm", idxKey.KeyEncryptionAlgorithm.ToString()));
