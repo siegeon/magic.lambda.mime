@@ -281,5 +281,28 @@ mime.create
             Assert.Contains(@"-----END PGP MESSAGE-----", entity.Get<string>());
             Assert.Contains(@"Content-Type: application/pgp-encrypted", entity.Get<string>());
         }
+
+        [Fact]
+        public void EncryptAndDecryptMimeMessage()
+        {
+            var lambda = Common.Evaluate(string.Format(@"
+.key:@""{0}""
+mime.create
+   entity:text/plain
+      encrypt:x:@.key
+      content:Foo bar
+.secret:@""{1}""
+mime.parse:x:@mime.create
+   key:x:@.secret
+      password:8pr4ms
+", PUBLIC_KEY, SECRET_KEY));
+            var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
+            Assert.Empty(entity.Children);
+            Assert.Contains(@"-----END PGP MESSAGE-----", entity.Get<string>());
+            Assert.Contains(@"Content-Type: application/pgp-encrypted", entity.Get<string>());
+            var decrypted = lambda.Children.FirstOrDefault(x => x.Name == "mime.parse");
+            Assert.Equal("463E0818186DDB6BF846D22492AC250C49CBEAF9", decrypted.Children.First().Children.First(x => x.Name == "fingerprint").Get<string>());
+            Assert.Equal("multipart/encrypted", decrypted.Children.First(x => x.Name == "entity").Get<string>());
+        }
     }
 }

@@ -21,7 +21,11 @@ namespace magic.lambda.mime.helpers
         /// </summary>
         /// <param name="node">Node containing the MIME message as value, and also where the lambda structure representing the parsed message will be placed.</param>
         /// <param name="entity"> MimeEntity to parse.</param>
-        public static void Parse(Node node, MimeEntity entity)
+        public static void Parse(
+            Node node,
+            MimeEntity entity,
+            string key = null,
+            string password = null)
         {
             var tmp = new Node("entity", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
@@ -42,6 +46,25 @@ namespace magic.lambda.mime.helpers
                 foreach (var idx in signed)
                 {
                     Parse(tmp, idx);
+                }
+            }
+            else if (entity is MultipartEncrypted enc)
+            {
+                var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(key);
+                using (var ctx = new PgpContext { Password = password, SecretKeyRings = secretKey })
+                {
+                    var decryptedEntity = enc.Decrypt(ctx, out var signatures);
+                    var cryptoSignatures = new Node("signatures");
+                    if (signatures != null && signatures.Any())
+                    {
+                        foreach (var idx in signatures)
+                        {
+                            cryptoSignatures.Add(new Node(idx.SignerCertificate.Fingerprint, idx.Verify()));
+                        }
+                        tmp.Add(cryptoSignatures);
+                    }
+                    tmp.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(secretKey.GetPublicKey())));
+                    Parse(tmp, decryptedEntity);
                 }
             }
             else if (entity is Multipart multi)

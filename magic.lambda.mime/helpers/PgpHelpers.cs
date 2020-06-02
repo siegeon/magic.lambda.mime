@@ -94,6 +94,22 @@ namespace magic.lambda.mime.helpers
             }
         }
 
+        /// <summary>
+        /// Returns a PGP secret key ring from the given ASCII armored secret key string content.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static PgpSecretKeyRing GetSecretKeyRingFromAsciiArmored(string key)
+        {
+            using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(key)))
+            {
+                using (var armored = new ArmoredInputStream(memStream))
+                {
+                    return new PgpSecretKeyRing(armored);
+                }
+            }
+        }
+
         public static PgpPublicKey GetPublicKeyFromAsciiArmored(string key)
         {
             using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(key)))
