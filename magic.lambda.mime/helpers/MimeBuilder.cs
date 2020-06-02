@@ -84,7 +84,9 @@ namespace magic.lambda.mime.helpers
             var encryptionKey = input.Children.FirstOrDefault(x => x.Name == "encrypt")?.GetEx<string>();
             var signingKey = input.Children.FirstOrDefault(x => x.Name == "sign")?.GetEx<string>();
             var signingKeyPassword = input.Children.FirstOrDefault(x => x.Name == "sign")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>();
-            if (!string.IsNullOrEmpty(encryptionKey))
+            if (!string.IsNullOrEmpty(encryptionKey) && !string.IsNullOrEmpty(signingKey))
+                result = SignAndEncrypt(result, encryptionKey, signingKey, signingKeyPassword);
+            else if (!string.IsNullOrEmpty(encryptionKey))
                 result = Encrypt(result, encryptionKey);
             else if (!string.IsNullOrEmpty(signingKey))
                 result = Sign(result, signingKey, signingKeyPassword); // Signing entity.
@@ -203,7 +205,28 @@ namespace magic.lambda.mime.helpers
             }
         }
 
-        static MultipartSigned Sign(MimeEntity entity, string key, string password)
+        static MultipartEncrypted SignAndEncrypt(
+            MimeEntity entity,
+            string encryptionKey,
+            string signingKey,
+            string password)
+        {
+            var algo = DigestAlgorithm.Sha256;
+            using (var ctx = new PgpContext { Password = password })
+            {
+                return MultipartEncrypted.SignAndEncrypt(
+                    ctx,
+                    PgpHelpers.GetSecretKeyFromAsciiArmored(signingKey),
+                    algo,
+                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey) },
+                    entity);
+            }
+        }
+
+        static MultipartSigned Sign(
+            MimeEntity entity,
+            string key,
+            string password)
         {
             var algo = DigestAlgorithm.Sha256;
             using (var ctx = new PgpContext { Password = password })

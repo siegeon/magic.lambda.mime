@@ -283,6 +283,23 @@ mime.create
         }
 
         [Fact]
+        public void SignAndEncryptMimeMessage()
+        {
+            var lambda = Common.Evaluate(string.Format(@"
+.public:@""{1}""
+.key:@""{0}""
+mime.create
+   entity:text/plain
+      sign:x:@.key
+         password:8pr4ms
+      encrypt:x:@.public
+      content:Foo bar
+", SECRET_KEY, PUBLIC_KEY));
+            var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
+            Assert.Empty(entity.Children);
+        }
+
+        [Fact]
         public void EncryptAndDecryptMimeMessage()
         {
             var lambda = Common.Evaluate(string.Format(@"
@@ -294,8 +311,7 @@ mime.create
 .secret:@""{1}""
 mime.parse:x:@mime.create
    key:x:@.secret
-      password:8pr4ms
-", PUBLIC_KEY, SECRET_KEY));
+      password:8pr4ms", PUBLIC_KEY, SECRET_KEY));
             var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
             Assert.Empty(entity.Children);
             Assert.Contains(@"-----END PGP MESSAGE-----", entity.Get<string>());
