@@ -17,11 +17,6 @@ namespace magic.lambda.mime
     [Slot(Name = ".mime.parse")]
     public class MimeParsePrivate : ISlot
     {
-        static MimeParsePrivate()
-        {
-            CryptographyContext.Register(typeof(PGPContext));
-        }
-
         /// <summary>
         /// Implementation of your slot.
         /// </summary>

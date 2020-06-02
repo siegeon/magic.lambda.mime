@@ -30,14 +30,11 @@ namespace magic.lambda.mime.helpers
             {
                 // Multipart content.
                 var signatures = new Node("signatures");
-                using (var ctx = new PGPContext())
+                foreach (var idx in signed.Verify())
                 {
-                    foreach (var idx in signed.Verify(ctx))
-                    {
-                        if (!idx.Verify())
-                            throw new SecurityException("Signature of MIME message was not valid");
-                        signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
-                    }
+                    if (!idx.Verify())
+                        throw new SecurityException("Signature of MIME message was not valid");
+                    signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
                 }
                 tmp.Add(signatures);
 

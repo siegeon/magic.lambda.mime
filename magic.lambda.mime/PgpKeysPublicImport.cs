@@ -18,16 +18,11 @@ using magic.lambda.mime.helpers;
 namespace magic.lambda.mime
 {
     /// <summary>
-    /// Parses a MIME message and returns its as a hierarchical object of lambda to caller.
+    /// Imports a public PGP key ring, which often is a master key, in addition to its sub keys.
     /// </summary>
     [Slot(Name = "pgp.keys.public.import")]
     public class PgpKeysPublicImport : ISlot
     {
-        static PgpKeysPublicImport()
-        {
-            CryptographyContext.Register(typeof(PGPContext));
-        }
-
         /// <summary>
         /// Implementation of your slot.
         /// </summary>
@@ -49,6 +44,7 @@ namespace magic.lambda.mime
                     var key = new PgpPublicKeyRing(armored);
                     foreach (PgpPublicKey idxKey in key.GetPublicKeys())
                     {
+                        // Parametrizing [.lambda] callback with key and data.
                         var keyNode = new Node(".key");
                         keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(idxKey)));
                         keyNode.Add(new Node("content", PgpHelpers.GetKey(idxKey)));
@@ -60,6 +56,7 @@ namespace magic.lambda.mime
                         keyNode.Add(new Node("is-master", idxKey.IsMasterKey));
                         keyNode.Add(new Node("is-revoked", idxKey.IsRevoked()));
 
+                        // Adding ID for key.
                         var ids = new Node("ids");
                         foreach (var idxId in idxKey.GetUserIds())
                         {
@@ -68,6 +65,7 @@ namespace magic.lambda.mime
                         if (ids.Children.Any())
                             keyNode.Add(ids);
 
+                        // Invoking [.lambda] making sure we reset it after evaluation.
                         var exe = lambda.Clone();
                         lambda.Insert(0, keyNode);
                         signaler.Signal("eval", lambda);

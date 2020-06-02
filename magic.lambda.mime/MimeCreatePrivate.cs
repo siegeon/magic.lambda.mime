@@ -19,11 +19,6 @@ namespace magic.lambda.mime
     [Slot(Name = ".mime.create")]
     public class MimeCreatePrivate : ISlot
     {
-        static MimeCreatePrivate()
-        {
-            CryptographyContext.Register(typeof(PGPContext));
-        }
-
         /// <summary>
         /// Implementation of your slot.
         /// </summary>
