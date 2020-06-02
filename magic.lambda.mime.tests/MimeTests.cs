@@ -3,6 +3,7 @@
  * See the enclosed LICENSE file for details.
  */
 
+using System;
 using System.Linq;
 using Xunit;
 using MimeKit;
@@ -98,11 +99,38 @@ Vlw0KvRqBVBcqWr29a4QydWFZmfBs0C9GiFNcIo3zkEsf4MQFRIPAXbeMA==
 =X3uP
 -----END PGP PUBLIC KEY BLOCK-----";
             var lambda = Common.Evaluate(@"
-.data
+.keys
 pgp.public.import:@""" + mimeMessage + @"""
    .lambda
-      set-value:x:@.data
-         get-value:x:@.key");
+      add:x:@.keys
+         get-nodes:x:@.key");
+            var data = lambda.Children.First(x => x.Name == ".keys");
+
+            Assert.Equal(2, data.Children.Count());
+
+            // Checking first key
+            Assert.Equal("463E0818186DDB6BF846D22492AC250C49CBEAF9", data.Children.First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.Contains("-----BEGIN PGP PUBLIC KEY BLOCK-----", data.Children.First().Children.First(x => x.Name == "content").Get<string>());
+            Assert.Equal(typeof(DateTime), data.Children.First().Children.First(x => x.Name == "created").Value.GetType());
+            Assert.True(data.Children.First().Children.First(x => x.Name == "valid-seconds").Get<long>() > 1000);
+            Assert.Equal("RsaGeneral", data.Children.First().Children.First(x => x.Name == "algorithm").Value);
+            Assert.Equal(2048, data.Children.First().Children.First(x => x.Name == "bit-strength").Value);
+            Assert.True(data.Children.First().Children.First(x => x.Name == "is-encryption").Get<bool>());
+            Assert.True(data.Children.First().Children.First(x => x.Name == "is-master").Get<bool>());
+            Assert.False(data.Children.First().Children.First(x => x.Name == "is-revoked").Get<bool>());
+            Assert.Contains("Thomas Hansen <thomas@gaiasoul.com>", data.Children.First().Children.First(x => x.Name == "ids").Children.First().Get<string>());
+
+            // Checking second key
+            Assert.Equal("686C520F02716F59C9694AFE5A95B76FEC21441C", data.Children.Skip(1).First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.Contains("-----BEGIN PGP MESSAGE-----", data.Children.Skip(1).First().Children.First(x => x.Name == "content").Get<string>());
+            Assert.Equal(typeof(DateTime), data.Children.Skip(1).First().Children.First(x => x.Name == "created").Value.GetType());
+            Assert.True(data.Children.Skip(1).First().Children.First(x => x.Name == "valid-seconds").Get<long>() > 1000);
+            Assert.Equal("RsaGeneral", data.Children.Skip(1).First().Children.First(x => x.Name == "algorithm").Value);
+            Assert.Equal(2048, data.Children.Skip(1).First().Children.First(x => x.Name == "bit-strength").Value);
+            Assert.True(data.Children.Skip(1).First().Children.First(x => x.Name == "is-encryption").Get<bool>());
+            Assert.False(data.Children.Skip(1).First().Children.First(x => x.Name == "is-master").Get<bool>());
+            Assert.False(data.Children.Skip(1).First().Children.First(x => x.Name == "is-revoked").Get<bool>());
+            Assert.Null(data.Children.Skip(1).First().Children.FirstOrDefault(x => x.Name == "ids"));
         }
 
         [Fact]
