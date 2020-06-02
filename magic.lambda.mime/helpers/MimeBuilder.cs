@@ -8,10 +8,11 @@ using System.IO;
 using System.Linq;
 using MimeKit;
 using MimeKit.IO;
+using MimeKit.Cryptography;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
-using MimeKit.Cryptography;
 
 namespace magic.lambda.mime.helpers
 {
@@ -80,9 +81,12 @@ namespace magic.lambda.mime.helpers
                     result = CreateMultipart(signaler, subType, input);
                     break;
             }
+            var encryptionKey = input.Children.FirstOrDefault(x => x.Name == "encrypt")?.GetEx<string>();
             var signingKey = input.Children.FirstOrDefault(x => x.Name == "sign")?.GetEx<string>();
             var signingKeyPassword = input.Children.FirstOrDefault(x => x.Name == "sign")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>();
-            if (!string.IsNullOrEmpty(signingKey))
+            if (!string.IsNullOrEmpty(encryptionKey))
+                result = Encrypt(result, encryptionKey);
+            else if (!string.IsNullOrEmpty(signingKey))
                 result = Sign(result, signingKey, signingKeyPassword); // Signing entity.
             return result;
         }
@@ -201,20 +205,23 @@ namespace magic.lambda.mime.helpers
 
         static MultipartSigned Sign(MimeEntity entity, string key, string password)
         {
-            /*
-             * Figuring out signature Digest Algorithm to use for signature, defaulting to SHA256.
-             * SHA256 should be safe, since there are no known collision weaknesses in it.
-             * Therefor we default to SHA256, unlesss caller explicitly tells us he wants to use another algorithm.
-             */
             var algo = DigestAlgorithm.Sha256;
-
-            // Signing content of email and returning to caller.
             using (var ctx = new PgpContext { Password = password })
             {
                 return MultipartSigned.Create(
                     ctx,
-                    PgpHelpers.GetKeyFromAsciiArmored(key),
+                    PgpHelpers.GetSecretKeyFromAsciiArmored(key),
                     algo,
+                    entity);
+            }
+        }
+
+        static MultipartEncrypted Encrypt(MimeEntity entity, string key)
+        {
+            using (var ctx = new PgpContext())
+            {
+                return MultipartEncrypted.Encrypt(
+                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(key) },
                     entity);
             }
         }

@@ -6,15 +6,13 @@
 using System;
 using System.Linq;
 using Xunit;
-using MimeKit;
-using magic.node;
 using magic.node.extensions;
 
 namespace magic.lambda.mime.tests
 {
     public class PgpTests
     {
-        const string PUBLIC_KEY = @"-----BEGIN PGP PUBLIC KEY BLOCK-----
+        const string PUBLIC_KEYPAIR = @"-----BEGIN PGP PUBLIC KEY BLOCK-----
 Comment: User-ID:	Thomas Hansen <thomas@gaiasoul.com>
 Comment: Created:	02/06/2020 9:54 AM
 Comment: Expires:	02/06/2022 12:00 PM
@@ -149,12 +147,33 @@ Nx92FnQ=
 -----END PGP PRIVATE KEY BLOCK-----
 ";
 
+        const string PUBLIC_KEY = @"-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: BCPG C# v1.8.5.0
+
+mQENBF7V98IBCADE5IzvcgltfoDIU60ahHpfdjiht1ja+vIyCsq/N2BAa0JAItOM
+a/1tUux+2bSuaHc8e4c8VKUJvS5KJC1ElmoISnFnvpNSb/xTPsga2auP8IsptWRU
+BWXIGRoztFUoK22le4KaKQDJL+Icrqi31DKo0TGgg628EOa0SlR8YPGctpqQ54Bi
+FCg123bD1X8UL6QG1xS8KuXbTbzWHNOGisa8d+7mSxcnLlwliJBNCCGBxD+zwuus
+5+hXIVI1OllApmUggoxDnqukpA6agOneISnEzX1teoBwBnUDUZLt4lcsTRr0OzrQ
+QDIxZPCcBT0FUkFXBTCRxzyHi+WF9btpfYpTABEBAAG0I1Rob21hcyBIYW5zZW4g
+PHRob21hc0BnYWlhc291bC5jb20+iQFUBBMBCAA+FiEERj4IGBht22v4RtIkkqwl
+DEnL6vkFAl7V98ICGwMFCQPChE4FCwkIBwIGFQoJCAsCBBYCAwECHgECF4AACgkQ
+kqwlDEnL6vlfNwf/UwVQpXoY98tAeHGFtlO9SHHFUCdzbsfnt3y3Cp+JmUp45O90
+p9QpVNvWo4K9aKs5DHOePdEdcXuAC3taZxRFhFmQe9RdRrjl0fcEoaeuX3ATfsA7
+a7KwAOiMl7QesAPY4Sln4pCARfh7NwFA94rGy8HDk3ja3j8kFRR+4ck8pRYizwOr
+oNyFcO8YGgvs8EBB6FCHsWAr8z5aGB2jl9AGH64vIFEie1bvrq1v4XRBS/uSzIL0
+Y4RcF3VohHyI0IqXAaSo4oNKPsr4PVmTqAajtWoBkMSRhjgim1neoYNRdXemRNul
+zY1PHUHz8WKHxyTqG4JJJMFNQTjKB+I3H3YWdA==
+=6XAy
+-----END PGP PUBLIC KEY BLOCK-----
+";
+
         [Fact]
         public void ImportPgpPublicKey()
         {
             var lambda = Common.Evaluate(@"
 .keys
-pgp.keys.public.import:@""" + PUBLIC_KEY + @"""
+pgp.keys.public.import:@""" + PUBLIC_KEYPAIR + @"""
    .lambda
       add:x:@.keys
          get-nodes:x:@.key");
@@ -245,8 +264,22 @@ mime.create
 ", SECRET_KEY));
             var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
             Assert.Empty(entity.Children);
+        }
+
+        [Fact]
+        public void EncryptMimeMessage()
+        {
+            var lambda = Common.Evaluate(string.Format(@"
+.key:@""{0}""
+mime.create
+   entity:text/plain
+      encrypt:x:@.key
+      content:Foo bar
+", PUBLIC_KEY));
+            var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
+            Assert.Empty(entity.Children);
             Assert.Contains(@"-----END PGP MESSAGE-----", entity.Get<string>());
-            Assert.Contains(@"protocol=""application/pgp-signature""; micalg=pgp-sha256", entity.Get<string>());
+            Assert.Contains(@"Content-Type: application/pgp-encrypted", entity.Get<string>());
         }
     }
 }

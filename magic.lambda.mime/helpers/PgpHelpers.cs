@@ -82,7 +82,7 @@ namespace magic.lambda.mime.helpers
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static PgpSecretKey GetKeyFromAsciiArmored(string key)
+        public static PgpSecretKey GetSecretKeyFromAsciiArmored(string key)
         {
             using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(key)))
             {
@@ -90,6 +90,18 @@ namespace magic.lambda.mime.helpers
                 {
                     var result = new PgpSecretKeyRing(armored);
                     return result.GetSecretKey();
+                }
+            }
+        }
+
+        public static PgpPublicKey GetPublicKeyFromAsciiArmored(string key)
+        {
+            using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(key)))
+            {
+                using (var armored = new ArmoredInputStream(memStream))
+                {
+                    var result = new PgpPublicKeyRing(armored);
+                    return result.GetPublicKey();
                 }
             }
         }
