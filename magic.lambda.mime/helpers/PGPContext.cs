@@ -5,6 +5,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -12,24 +13,27 @@ using MimeKit;
 using MimeKit.Cryptography;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using magic.node;
+using magic.signals.contracts;
 
 namespace magic.lambda.mime.helpers
 {
     public class PGPContext : OpenPgpContext
     {
-        readonly Node _lambda;
+        readonly ISignaler _signaler;
 
         public PGPContext()
         { }
 
-        public PGPContext(Node lambda)
+        public PGPContext(ISignaler signaler)
         {
-            _lambda = lambda ?? throw new ArgumentNullException(nameof(lambda));
+            _signaler = signaler ?? throw new ArgumentNullException(nameof(signaler));
         }
+
+        public Node ImportPrivateLambda { get; set; }
 
         protected override string GetPasswordForKey(PgpSecretKey key)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override IEnumerable<PgpPublicKey> EnumeratePublicKeys(MailboxAddress mailbox)
@@ -107,6 +111,8 @@ namespace magic.lambda.mime.helpers
             return base.VerifyAsync(content, signatureData, cancellationToken);
         }
 
+        #region [ -- Import keys -- ]
+
         public override void Import(PgpPublicKeyRing keyring)
         {
             base.Import(keyring);
@@ -119,12 +125,28 @@ namespace magic.lambda.mime.helpers
 
         public override void Import(PgpSecretKeyRing keyring)
         {
-            base.Import(keyring);
+            var clone = ImportPrivateLambda.Clone();
+            var keyNode = new Node(".key");
+            var fingerprint = new StringBuilder();
+
+            var data = keyring.GetPublicKey().GetFingerprint();
+            for (int idx = 0; idx < data.Length; idx++)
+            {
+                fingerprint.Append(data[idx].ToString("x2"));
+                if (idx % 2 != 0)
+                    fingerprint.Append("-");
+            }
+
+            keyNode.Add(new Node("fingerprint", fingerprint.ToString().TrimEnd('-')));
+            clone.Insert(0, keyNode);
+            _signaler.Signal("eval", clone);
         }
 
         public override void Import(PgpSecretKeyRingBundle bundle)
         {
             base.Import(bundle);
         }
+
+        #endregion
     }
 }

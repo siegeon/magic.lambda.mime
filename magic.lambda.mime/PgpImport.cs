@@ -35,7 +35,10 @@ namespace magic.lambda.mime
         public void Signal(ISignaler signaler, Node input)
         {
             var keyPlainText = input.GetEx<string>();
-            using (var ctx = new PGPContext(input.Children.First(x => x.Name == ".lambda")))
+            using (var ctx = new PGPContext(signaler)
+            {
+                ImportPrivateLambda = input.Children.First(x => x.Name == ".lambda"),
+            })
             {
                 using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(keyPlainText.Replace("\r\n", "\n"))))
                 {

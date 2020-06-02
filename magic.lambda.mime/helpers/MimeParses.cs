@@ -30,7 +30,7 @@ namespace magic.lambda.mime.helpers
             {
                 // Multipart content.
                 var signatures = new Node("signatures");
-                using (var ctx = new PGPContext())
+                using (var ctx = new PGPContext(null))
                 {
                     foreach (var idx in signed.Verify(ctx))
                     {
