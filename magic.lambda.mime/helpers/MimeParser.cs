@@ -23,7 +23,7 @@ namespace magic.lambda.mime.helpers
         /// Parses a MimeEntity and returns as lambda to caller.
         /// </summary>
         /// <param name="node">Node containing the MIME message as value, and also where the lambda structure representing the parsed message will be placed.</param>
-        /// <param name="entity"> MimeEntity to parse.</param>
+        /// <param name="entity">MimeEntity to parse.</param>
         public static void Parse(
             Node node,
             MimeEntity entity,
