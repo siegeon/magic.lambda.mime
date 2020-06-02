@@ -30,7 +30,11 @@ namespace magic.lambda.mime.helpers
             Func<string> keyFunc,
             Func<PgpSecretKey, string> passwordFunc)
         {
-            ParseImplementation(node, entity, keyFunc, passwordFunc);
+            ParseImplementation(
+                node,
+                entity,
+                keyFunc,
+                passwordFunc);
         }
 
         /// <summary>
