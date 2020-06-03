@@ -5,6 +5,7 @@
 
 using System.IO;
 using System.Text;
+using System.Linq;
 using MimeKit;
 using magic.node;
 using magic.node.extensions;
@@ -25,11 +26,28 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
+            try
             {
-                var message = MimeMessage.Load(stream);
-                helpers.MimeParser.Parse(input, message.Body);
-                input.Value = null;
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
+                {
+                    var message = MimeEntity.Load(stream);
+                    helpers.MimeParser.Parse(
+                        input,
+                        message,
+                        (fingerprint) => input.Children
+                            .FirstOrDefault(x => x.Name == "key")?
+                            .GetEx<string>(),
+                        (sec) => input.Children
+                            .FirstOrDefault(x => x.Name == "key")?
+                            .Children
+                            .FirstOrDefault(x => x.Name == "password")?
+                            .GetEx<string>());
+                    input.Value = null;
+                }
+            }
+            finally
+            {
+                input.Children.FirstOrDefault(x => x.Name == "key")?.UnTie();
             }
         }
     }

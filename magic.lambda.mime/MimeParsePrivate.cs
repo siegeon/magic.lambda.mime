@@ -3,8 +3,10 @@
  * See the enclosed LICENSE file for details.
  */
 
+using System.Linq;
 using MimeKit;
 using magic.node;
+using magic.node.extensions;
 using magic.signals.contracts;
 
 namespace magic.lambda.mime
@@ -23,7 +25,17 @@ namespace magic.lambda.mime
         public void Signal(ISignaler signaler, Node input)
         {
             var message = input.Value as MimeEntity;
-            helpers.MimeParser.Parse(input, message);
+            helpers.MimeParser.Parse(
+                input,
+                message,
+                (fingerprint) => input.Children
+                    .FirstOrDefault(x => x.Name == "key")?
+                    .GetEx<string>(),
+                (sec) => input.Children
+                    .FirstOrDefault(x => x.Name == "key")?
+                    .Children
+                    .FirstOrDefault(x => x.Name == "password")?
+                    .GetEx<string>());
             input.Value = null;
         }
     }

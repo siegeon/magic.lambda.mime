@@ -3,6 +3,7 @@
  * See the enclosed LICENSE file for details.
  */
 
+using MimeKit.Cryptography;
 using magic.node;
 using magic.signals.contracts;
 using magic.lambda.mime.helpers;
@@ -15,6 +16,11 @@ namespace magic.lambda.mime
     [Slot(Name = "mime.create")]
     public class MimeCreate : ISlot
     {
+        static MimeCreate()
+        {
+            CryptographyContext.Register(typeof(PgpContext));
+        }
+
         /// <summary>
         /// Implementation of your slot.
         /// </summary>
@@ -22,7 +28,7 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            var entity = MimeBuilder.Create(signaler, input);
+            var entity = MimeCreator.Create(signaler, input);
             try
             {
                 input.Value = entity.ToString();
@@ -30,7 +36,7 @@ namespace magic.lambda.mime
             }
             finally
             {
-                MimeBuilder.Dispose(entity);
+                MimeCreator.Dispose(entity);
             }
         }
     }

@@ -3,6 +3,7 @@
  * See the enclosed LICENSE file for details.
  */
 
+using System;
 using System.Linq;
 using Xunit;
 using MimeKit;
@@ -16,8 +17,7 @@ namespace magic.lambda.mime.tests
         [Fact]
         public void ParseMultipartMessage()
         {
-            string mimeMessage = @"MIME-Version: 1.0
-Content-Type: multipart/mixed;
+            string mimeMessage = @"Content-Type: multipart/mixed;
         boundary=""XXXXboundary text""
 
 This is a multipart message in MIME format.
@@ -60,8 +60,7 @@ this is another body text
         [Fact]
         public void ParseMessageWithHeaders()
         {
-            string mimeMessage = @"MIME-Version: 1.0
-Content-Type: text/plain
+            string mimeMessage = @"Content-Type: text/plain
 Content-Disposition: inline
 
 Hello World!";

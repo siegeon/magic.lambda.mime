@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using MimeKit;
 using MimeKit.IO;
+using MimeKit.Cryptography;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 using magic.node;
 using magic.node.extensions;
 using magic.signals.contracts;
@@ -17,7 +19,7 @@ namespace magic.lambda.mime.helpers
     /// <summary>
     /// Helper class to create MIME messages.
     /// </summary>
-    public static class MimeBuilder
+    public static class MimeCreator
     {
         /// <summary>
         /// Creates a MimeEntity given the structured input node, and returns MimeEntity to caller.
@@ -79,6 +81,15 @@ namespace magic.lambda.mime.helpers
                     result = CreateMultipart(signaler, subType, input);
                     break;
             }
+            var encryptionKey = input.Children.FirstOrDefault(x => x.Name == "encrypt")?.GetEx<string>();
+            var signingKey = input.Children.FirstOrDefault(x => x.Name == "sign")?.GetEx<string>();
+            var signingKeyPassword = input.Children.FirstOrDefault(x => x.Name == "sign")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>();
+            if (!string.IsNullOrEmpty(encryptionKey) && !string.IsNullOrEmpty(signingKey))
+                result = SignAndEncrypt(result, encryptionKey, signingKey, signingKeyPassword);
+            else if (!string.IsNullOrEmpty(encryptionKey))
+                result = Encrypt(result, encryptionKey);
+            else if (!string.IsNullOrEmpty(signingKey))
+                result = Sign(result, signingKey, signingKeyPassword); // Signing entity.
             return result;
         }
 
@@ -191,6 +202,51 @@ namespace magic.lambda.mime.helpers
             foreach (var idx in headerNode.Children.Where(ix => ix.Name != "Content-Type" && ix.Name != "content"))
             {
                 entity.Headers.Replace(idx.Name, idx.GetEx<string>());
+            }
+        }
+
+        static MultipartSigned Sign(
+            MimeEntity entity,
+            string key,
+            string password)
+        {
+            var algo = DigestAlgorithm.Sha256;
+            using (var ctx = new PgpContext { Password = password })
+            {
+                return MultipartSigned.Create(
+                    ctx,
+                    PgpHelpers.GetSecretKeyFromAsciiArmored(key),
+                    algo,
+                    entity);
+            }
+        }
+
+        static MultipartEncrypted Encrypt(MimeEntity entity, string key)
+        {
+            using (var ctx = new PgpContext())
+            {
+                return MultipartEncrypted.Encrypt(
+                    ctx,
+                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(key) },
+                    entity);
+            }
+        }
+
+        static MultipartEncrypted SignAndEncrypt(
+            MimeEntity entity,
+            string encryptionKey,
+            string signingKey,
+            string password)
+        {
+            var algo = DigestAlgorithm.Sha256;
+            using (var ctx = new PgpContext { Password = password })
+            {
+                return MultipartEncrypted.SignAndEncrypt(
+                    ctx,
+                    PgpHelpers.GetSecretKeyFromAsciiArmored(signingKey),
+                    algo,
+                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey) },
+                    entity);
             }
         }
 
