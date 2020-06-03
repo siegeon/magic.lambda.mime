@@ -3,7 +3,6 @@
  * See the enclosed LICENSE file for details.
  */
 
-using System;
 using System.Linq;
 using Xunit;
 using MimeKit;

@@ -234,34 +234,30 @@ namespace magic.lambda.mime.helpers
         }
 
         /*
-         * Cryptographically signs an entity.
-         */
-        static MultipartSigned Sign(
-            MimeEntity entity,
-            string key,
-            string password)
-        {
-            var algo = DigestAlgorithm.Sha256;
-            using (var ctx = new CreatePgpMimeContext { Password = password })
-            {
-                return MultipartSigned.Create(
-                    ctx,
-                    PgpHelpers.GetSecretKeyFromAsciiArmored(key),
-                    algo,
-                    entity);
-            }
-        }
-
-        /*
          * Encrypts an entity.
          */
         static MultipartEncrypted Encrypt(MimeEntity entity, Node encryptionNode)
         {
-            using (var ctx = new CreatePgpMimeContext())
+            return MultipartEncrypted.Encrypt(
+                GetEncryptionKeys(encryptionNode),
+                entity);
+        }
+
+        /*
+         * Cryptographically signs an entity.
+         */
+        static MultipartSigned Sign(
+            MimeEntity entity,
+            string armoredPrivateKey,
+            string keyPassword)
+        {
+            var algo = DigestAlgorithm.Sha256;
+            using (var ctx = new CreatePgpMimeContext { Password = keyPassword })
             {
-                return MultipartEncrypted.Encrypt(
+                return MultipartSigned.Create(
                     ctx,
-                    GetEncryptionKeys(encryptionNode),
+                    PgpHelpers.GetSecretKeyFromAsciiArmored(armoredPrivateKey),
+                    algo,
                     entity);
             }
         }
@@ -272,15 +268,15 @@ namespace magic.lambda.mime.helpers
         static MultipartEncrypted SignAndEncrypt(
             MimeEntity entity,
             Node encryptionNode,
-            string signingKey,
-            string password)
+            string armoredPrivateKey,
+            string keyPassword)
         {
             var algo = DigestAlgorithm.Sha256;
-            using (var ctx = new CreatePgpMimeContext { Password = password })
+            using (var ctx = new CreatePgpMimeContext { Password = keyPassword })
             {
                 return MultipartEncrypted.SignAndEncrypt(
                     ctx,
-                    PgpHelpers.GetSecretKeyFromAsciiArmored(signingKey),
+                    PgpHelpers.GetSecretKeyFromAsciiArmored(armoredPrivateKey),
                     algo,
                     GetEncryptionKeys(encryptionNode),
                     entity);
@@ -299,7 +295,7 @@ namespace magic.lambda.mime.helpers
                 var result = PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey.GetEx<string>());
 
                 // Sanity checking key, before returning to caller.
-                SanityCheckPublicKey(result);
+                SanityCheckCryptographyKey(result);
                 yield return result;
             }
 
@@ -309,7 +305,7 @@ namespace magic.lambda.mime.helpers
                 var result = PgpHelpers.GetPublicKeyFromAsciiArmored(idx.GetEx<string>());
 
                 // Sanity checking key, before returning to caller.
-                SanityCheckPublicKey(result);
+                SanityCheckCryptographyKey(result);
                 yield return result;
             }
         }
@@ -317,7 +313,7 @@ namespace magic.lambda.mime.helpers
         /*
          * Sanity checks public PGP key, to make sure it's valid for encrypting MIME entities.
          */
-        static void SanityCheckPublicKey(PgpPublicKey key)
+        static void SanityCheckCryptographyKey(PgpPublicKey key)
         {
             if (!key.IsEncryptionKey)
                 throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(key)}' is not an encryption key");
