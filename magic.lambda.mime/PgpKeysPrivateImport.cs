@@ -66,6 +66,7 @@ namespace magic.lambda.mime
             var keyNode = new Node(".key");
             keyNode.Add(new Node("private", true));
             keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(idxKey.PublicKey)));
+            keyNode.Add(new Node("id", idxKey.KeyId));
             keyNode.Add(new Node("content", PgpHelpers.GetAsciiArmoredSecretKey(idxKey)));
             keyNode.Add(new Node("is-master", idxKey.IsMasterKey));
             keyNode.Add(new Node("is-signing-key", idxKey.IsSigningKey));

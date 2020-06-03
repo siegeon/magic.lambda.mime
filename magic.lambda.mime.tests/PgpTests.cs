@@ -183,6 +183,7 @@ pgp.keys.public.import:@""" + PUBLIC_KEYPAIR + @"""
 
             // Checking first key
             Assert.Equal("463E0818186DDB6BF846D22492AC250C49CBEAF9", data.Children.First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.Equal(-7877880913469904135, data.Children.First().Children.First(x => x.Name == "id").Value);
             Assert.Contains("-----BEGIN PGP PUBLIC KEY BLOCK-----", data.Children.First().Children.First(x => x.Name == "content").Get<string>());
             Assert.Equal(typeof(DateTime), data.Children.First().Children.First(x => x.Name == "created").Value.GetType());
             Assert.True(data.Children.First().Children.First(x => x.Name == "valid-seconds").Get<long>() > 1000);
@@ -195,6 +196,7 @@ pgp.keys.public.import:@""" + PUBLIC_KEYPAIR + @"""
 
             // Checking second key
             Assert.Equal("686C520F02716F59C9694AFE5A95B76FEC21441C", data.Children.Skip(1).First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.Equal(6527324926274257948, data.Children.Skip(1).First().Children.First(x => x.Name == "id").Value);
             Assert.Contains("-----BEGIN PGP MESSAGE-----", data.Children.Skip(1).First().Children.First(x => x.Name == "content").Get<string>());
             Assert.Equal(typeof(DateTime), data.Children.Skip(1).First().Children.First(x => x.Name == "created").Value.GetType());
             Assert.True(data.Children.Skip(1).First().Children.First(x => x.Name == "valid-seconds").Get<long>() > 1000);
@@ -221,6 +223,7 @@ pgp.keys.private.import:@""" + PRIVATE_KEYPAIR + @"""
 
             // Checking first key
             Assert.Equal("463E0818186DDB6BF846D22492AC250C49CBEAF9", data.Children.First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.Equal(-7877880913469904135, data.Children.First().Children.First(x => x.Name == "id").Value);
             Assert.True(data.Children.First().Children.First(x => x.Name == "private").Get<bool>());
             Assert.Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----", data.Children.First().Children.First(x => x.Name == "content").Get<string>());
             Assert.True(data.Children.First().Children.First(x => x.Name == "is-master").Get<bool>());
@@ -230,6 +233,7 @@ pgp.keys.private.import:@""" + PRIVATE_KEYPAIR + @"""
 
             // Checking second key
             Assert.Equal("686C520F02716F59C9694AFE5A95B76FEC21441C", data.Children.Skip(1).First().Children.First(x => x.Name == "fingerprint").Value);
+            Assert.Equal(6527324926274257948, data.Children.Skip(1).First().Children.First(x => x.Name == "id").Value);
             Assert.True(data.Children.Skip(1).First().Children.First(x => x.Name == "private").Get<bool>());
             Assert.Contains("-----BEGIN PGP MESSAGE-----", data.Children.Skip(1).First().Children.First(x => x.Name == "content").Get<string>());
             Assert.False(data.Children.Skip(1).First().Children.First(x => x.Name == "is-master").Get<bool>());

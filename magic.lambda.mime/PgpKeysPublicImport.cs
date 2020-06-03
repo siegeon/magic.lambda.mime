@@ -60,6 +60,7 @@ namespace magic.lambda.mime
             var keyNode = new Node(".key");
             keyNode.Add(new Node("private", false));
             keyNode.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(key)));
+            keyNode.Add(new Node("id", key.KeyId));
             keyNode.Add(new Node("content", PgpHelpers.GetAsciiArmoredPublicKey(key)));
             keyNode.Add(new Node("created", key.CreationTime));
             keyNode.Add(new Node("valid-seconds", key.GetValidSeconds()));

@@ -166,9 +166,7 @@ namespace magic.lambda.mime.helpers
         /*
          * Creates ContentObject from value found in node.
          */
-        static void CreateContentObjectFromObject(
-            Node contentNode,
-            MimePart part)
+        static void CreateContentObjectFromObject(Node contentNode, MimePart part)
         {
             var stream = new MemoryBlockStream();
             var content = contentNode.GetEx<string>() ??
@@ -238,9 +236,7 @@ namespace magic.lambda.mime.helpers
          */
         static MultipartEncrypted Encrypt(MimeEntity entity, Node encryptionNode)
         {
-            return MultipartEncrypted.Encrypt(
-                GetEncryptionKeys(encryptionNode),
-                entity);
+            return MultipartEncrypted.Encrypt(GetEncryptionKeys(encryptionNode), entity);
         }
 
         /*
