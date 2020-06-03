@@ -242,7 +242,7 @@ namespace magic.lambda.mime.helpers
             string password)
         {
             var algo = DigestAlgorithm.Sha256;
-            using (var ctx = new PgpContext { Password = password })
+            using (var ctx = new CreatePgpMimeContext { Password = password })
             {
                 return MultipartSigned.Create(
                     ctx,
@@ -257,7 +257,7 @@ namespace magic.lambda.mime.helpers
          */
         static MultipartEncrypted Encrypt(MimeEntity entity, Node encryptionNode)
         {
-            using (var ctx = new PgpContext())
+            using (var ctx = new CreatePgpMimeContext())
             {
                 return MultipartEncrypted.Encrypt(
                     ctx,
@@ -276,7 +276,7 @@ namespace magic.lambda.mime.helpers
             string password)
         {
             var algo = DigestAlgorithm.Sha256;
-            using (var ctx = new PgpContext { Password = password })
+            using (var ctx = new CreatePgpMimeContext { Password = password })
             {
                 return MultipartEncrypted.SignAndEncrypt(
                     ctx,
@@ -297,10 +297,9 @@ namespace magic.lambda.mime.helpers
             if (encryptionKey.Value != null)
             {
                 var result = PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey.GetEx<string>());
-                if (!result.IsEncryptionKey)
-                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is not an encryption key");
-                if (result.IsRevoked())
-                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is revoked");
+
+                // Sanity checking key, before returning to caller.
+                SanityCheckPublicKey(result);
                 yield return result;
             }
 
@@ -308,12 +307,22 @@ namespace magic.lambda.mime.helpers
             foreach (var idx in encryptionKey.Children)
             {
                 var result = PgpHelpers.GetPublicKeyFromAsciiArmored(idx.GetEx<string>());
-                if (!result.IsEncryptionKey)
-                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is not an encryption key");
-                if (result.IsRevoked())
-                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is revoked");
+
+                // Sanity checking key, before returning to caller.
+                SanityCheckPublicKey(result);
                 yield return result;
             }
+        }
+
+        /*
+         * Sanity checks public PGP key, to make sure it's valid for encrypting MIME entities.
+         */
+        static void SanityCheckPublicKey(PgpPublicKey key)
+        {
+            if (!key.IsEncryptionKey)
+                throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(key)}' is not an encryption key");
+            if (key.IsRevoked())
+                throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(key)}' is revoked");
         }
 
         #endregion

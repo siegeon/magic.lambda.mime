@@ -71,14 +71,11 @@ namespace magic.lambda.mime.helpers
             {
                 // Multipart content.
                 var signatures = new Node("signatures");
-                using (var ctx = new PgpContext())
+                foreach (var idx in signed.Verify())
                 {
-                    foreach (var idx in signed.Verify(ctx))
-                    {
-                        if (!idx.Verify())
-                            throw new SecurityException("Signature of MIME message was not valid");
-                        signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
-                    }
+                    if (!idx.Verify())
+                        throw new SecurityException("Signature of MIME message was not valid");
+                    signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
                 }
                 tmp.Add(signatures);
 
@@ -91,12 +88,9 @@ namespace magic.lambda.mime.helpers
             else if (entity is MultipartEncrypted enc)
             {
                 var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(keyFunc(null));
-                using (var ctx = new PgpContext { Password = passwordFunc(secretKey.GetSecretKey()), SecretKeyRings = secretKey })
-                {
-                    var decryptedEntity = enc.Decrypt(ctx);
-                    tmp.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(secretKey.GetPublicKey())));
-                    ParseImplementation(tmp, decryptedEntity, keyFunc, passwordFunc);
-                }
+                var decryptedEntity = enc.Decrypt();
+                tmp.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(secretKey.GetPublicKey())));
+                ParseImplementation(tmp, decryptedEntity, keyFunc, passwordFunc);
             }
             else if (entity is Multipart multi)
             {

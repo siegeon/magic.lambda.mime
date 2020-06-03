@@ -14,7 +14,7 @@ namespace magic.lambda.mime.helpers
     /// PGP context to help decrypt and cryptographically sign MIME messages.
     /// Required by MimeKit.
     /// </summary>
-    public class PgpContext : OpenPgpContext
+    public class CreatePgpMimeContext : OpenPgpContext
     {
         /// <summary>
         /// Password to release private key.
