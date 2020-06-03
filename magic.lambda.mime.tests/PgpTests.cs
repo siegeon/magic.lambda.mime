@@ -298,30 +298,5 @@ mime.create
             var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
             Assert.Empty(entity.Children);
         }
-
-        [Fact]
-        public void SignAndVerify()
-        {
-            var lambda = Common.Evaluate(string.Format(@"
-.secret:@""{0}""
-.public:@""{1}""
-mime.create
-   entity:text/plain
-      sign:x:@.secret
-         password:8pr4ms
-      content:Foo bar
-mime.parse:x:-
-   .get-public
-      if
-         not
-            eq:x:@.fingerprint
-            .:463E0818186DDB6BF846D22492AC250C49CBEAF9
-         .lambda
-            throw:Public key did not match
-      return:x:@.public
-", SECRET_KEY, PUBLIC_KEY));
-            var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
-            Assert.Empty(entity.Children);
-        }
     }
 }
