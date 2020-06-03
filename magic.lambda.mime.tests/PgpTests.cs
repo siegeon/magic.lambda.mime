@@ -169,7 +169,7 @@ zY1PHUHz8WKHxyTqG4JJJMFNQTjKB+I3H3YWdA==
 ";
 
         [Fact]
-        public void ImportPgpPublicKey()
+        public void ImportPublicKey()
         {
             var lambda = Common.Evaluate(@"
 .keys
@@ -207,7 +207,7 @@ pgp.keys.public.import:@""" + PUBLIC_KEYPAIR + @"""
         }
 
         [Fact]
-        public void ImportPgpKeyPair()
+        public void ImportPrivateKeyPair()
         {
             var lambda = Common.Evaluate(@"
 .keys
@@ -252,7 +252,7 @@ pgp.keys.private.import:@""" + PRIVATE_KEYPAIR + @"""
         }
 
         [Fact]
-        public void SignMimeMessage()
+        public void Sign()
         {
             var lambda = Common.Evaluate(string.Format(@"
 .key:@""{0}""
@@ -267,7 +267,7 @@ mime.create
         }
 
         [Fact]
-        public void EncryptMimeMessage()
+        public void Encrypt()
         {
             var lambda = Common.Evaluate(string.Format(@"
 .key:@""{0}""
@@ -283,7 +283,7 @@ mime.create
         }
 
         [Fact]
-        public void SignAndEncryptMimeMessage()
+        public void SignAndEncrypt()
         {
             var lambda = Common.Evaluate(string.Format(@"
 .public:@""{1}""
@@ -300,25 +300,28 @@ mime.create
         }
 
         [Fact]
-        public void EncryptAndDecryptMimeMessage()
+        public void SignAndVerify()
         {
             var lambda = Common.Evaluate(string.Format(@"
-.key:@""{0}""
+.secret:@""{0}""
+.public:@""{1}""
 mime.create
    entity:text/plain
-      encrypt:x:@.key
+      sign:x:@.secret
+         password:8pr4ms
       content:Foo bar
-.secret:@""{1}""
-mime.parse:x:@mime.create
-   key:x:@.secret
-      password:8pr4ms", PUBLIC_KEY, SECRET_KEY));
+mime.parse:x:-
+   .get-public
+      if
+         not
+            eq:x:@.fingerprint
+            .:463E0818186DDB6BF846D22492AC250C49CBEAF9
+         .lambda
+            throw:Public key did not match
+      return:x:@.public
+", SECRET_KEY, PUBLIC_KEY));
             var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
             Assert.Empty(entity.Children);
-            Assert.Contains(@"-----END PGP MESSAGE-----", entity.Get<string>());
-            Assert.Contains(@"Content-Type: application/pgp-encrypted", entity.Get<string>());
-            var decrypted = lambda.Children.FirstOrDefault(x => x.Name == "mime.parse");
-            Assert.Equal("463E0818186DDB6BF846D22492AC250C49CBEAF9", decrypted.Children.First().Children.First(x => x.Name == "fingerprint").Get<string>());
-            Assert.Equal("multipart/encrypted", decrypted.Children.First(x => x.Name == "entity").Get<string>());
         }
     }
 }

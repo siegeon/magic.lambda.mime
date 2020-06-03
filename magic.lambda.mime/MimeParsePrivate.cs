@@ -28,7 +28,7 @@ namespace magic.lambda.mime
             helpers.MimeParser.Parse(
                 input,
                 message,
-                () => input.Children
+                (fingerprint) => input.Children
                     .FirstOrDefault(x => x.Name == "key")?
                     .GetEx<string>(),
                 (sec) => input.Children

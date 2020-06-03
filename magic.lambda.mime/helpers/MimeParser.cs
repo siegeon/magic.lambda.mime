@@ -27,7 +27,7 @@ namespace magic.lambda.mime.helpers
         public static void Parse(
             Node node,
             MimeEntity entity,
-            Func<string> keyFunc,
+            Func<string, string> keyFunc,
             Func<PgpSecretKey, string> passwordFunc)
         {
             ParseImplementation(
@@ -61,7 +61,7 @@ namespace magic.lambda.mime.helpers
         private static void ParseImplementation(
             Node node,
             MimeEntity entity,
-            Func<string> keyFunc,
+            Func<string, string> keyFunc,
             Func<PgpSecretKey, string> passwordFunc)
         {
             var tmp = new Node("entity", entity.ContentType.MimeType);
@@ -71,11 +71,14 @@ namespace magic.lambda.mime.helpers
             {
                 // Multipart content.
                 var signatures = new Node("signatures");
-                foreach (var idx in signed.Verify())
+                using (var ctx = new PgpContext())
                 {
-                    if (!idx.Verify())
-                        throw new SecurityException("Signature of MIME message was not valid");
-                    signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
+                    foreach (var idx in signed.Verify(ctx))
+                    {
+                        if (!idx.Verify())
+                            throw new SecurityException("Signature of MIME message was not valid");
+                        signatures.Add(new Node("fingerprint", idx.SignerCertificate.Fingerprint.ToLower()));
+                    }
                 }
                 tmp.Add(signatures);
 
@@ -87,7 +90,7 @@ namespace magic.lambda.mime.helpers
             }
             else if (entity is MultipartEncrypted enc)
             {
-                var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(keyFunc());
+                var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(keyFunc(null));
                 using (var ctx = new PgpContext { Password = passwordFunc(secretKey.GetSecretKey()), SecretKeyRings = secretKey })
                 {
                     var decryptedEntity = enc.Decrypt(ctx);
