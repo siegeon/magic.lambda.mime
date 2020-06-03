@@ -205,24 +205,6 @@ namespace magic.lambda.mime.helpers
             }
         }
 
-        static MultipartEncrypted SignAndEncrypt(
-            MimeEntity entity,
-            string encryptionKey,
-            string signingKey,
-            string password)
-        {
-            var algo = DigestAlgorithm.Sha256;
-            using (var ctx = new PgpContext { Password = password })
-            {
-                return MultipartEncrypted.SignAndEncrypt(
-                    ctx,
-                    PgpHelpers.GetSecretKeyFromAsciiArmored(signingKey),
-                    algo,
-                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey) },
-                    entity);
-            }
-        }
-
         static MultipartSigned Sign(
             MimeEntity entity,
             string key,
@@ -246,6 +228,24 @@ namespace magic.lambda.mime.helpers
                 return MultipartEncrypted.Encrypt(
                     ctx,
                     new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(key) },
+                    entity);
+            }
+        }
+
+        static MultipartEncrypted SignAndEncrypt(
+            MimeEntity entity,
+            string encryptionKey,
+            string signingKey,
+            string password)
+        {
+            var algo = DigestAlgorithm.Sha256;
+            using (var ctx = new PgpContext { Password = password })
+            {
+                return MultipartEncrypted.SignAndEncrypt(
+                    ctx,
+                    PgpHelpers.GetSecretKeyFromAsciiArmored(signingKey),
+                    algo,
+                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey) },
                     entity);
             }
         }
