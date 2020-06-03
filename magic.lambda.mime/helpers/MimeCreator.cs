@@ -6,6 +6,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using MimeKit;
 using MimeKit.IO;
 using MimeKit.Cryptography;
@@ -81,15 +82,35 @@ namespace magic.lambda.mime.helpers
                     result = CreateMultipart(signaler, subType, input);
                     break;
             }
-            var encryptionKey = input.Children.FirstOrDefault(x => x.Name == "encrypt")?.GetEx<string>();
-            var signingKey = input.Children.FirstOrDefault(x => x.Name == "sign")?.GetEx<string>();
-            var signingKeyPassword = input.Children.FirstOrDefault(x => x.Name == "sign")?.Children.FirstOrDefault(x => x.Name == "password")?.GetEx<string>();
-            if (!string.IsNullOrEmpty(encryptionKey) && !string.IsNullOrEmpty(signingKey))
+
+            // Retrieving cryptographic parameters, assuming if specified, the entity should be encrypted, signed, or both.
+            var encryptionKey = input.Children
+                .FirstOrDefault(x => x.Name == "encrypt");
+            var signingKey = input.Children
+                .FirstOrDefault(x => x.Name == "sign")?
+                .GetEx<string>();
+            var signingKeyPassword = input.Children
+                .FirstOrDefault(x => x.Name == "sign")?
+                .Children
+                .FirstOrDefault(x => x.Name == "password")?
+                .GetEx<string>();
+
+            // Checking if entity should be encrypted, cryptographically signed, or both.
+            if (encryptionKey != null && !string.IsNullOrEmpty(signingKey))
+            {
+                // Cryptographically signing entity, AND encrypting it.
                 result = SignAndEncrypt(result, encryptionKey, signingKey, signingKeyPassword);
-            else if (!string.IsNullOrEmpty(encryptionKey))
+            }
+            else if (encryptionKey != null)
+            {
+                // Only encrypting entity.
                 result = Encrypt(result, encryptionKey);
+            }
             else if (!string.IsNullOrEmpty(signingKey))
-                result = Sign(result, signingKey, signingKeyPassword); // Signing entity.
+            {
+                // Only cryptographically signing entity.
+                result = Sign(result, signingKey, signingKeyPassword);
+            }
             return result;
         }
 
@@ -105,7 +126,7 @@ namespace magic.lambda.mime.helpers
             // Retrieving [content] node.
             var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
                 messageNode.Children.FirstOrDefault(x => x.Name == "filename") ??
-                throw new ArgumentNullException("No [content] provided in [message]");
+                throw new ArgumentNullException("No [content] or [filename] provided in [entity]");
 
             var result = new MimePart(ContentType.Parse(mainType + "/" + subType));
             DecorateEntityHeaders(result, messageNode);
@@ -121,6 +142,9 @@ namespace magic.lambda.mime.helpers
             return result;
         }
 
+        /*
+         * Creates a multipart of some sort.
+         */
         static Multipart CreateMultipart(
             ISignaler signaler,
             string subType,
@@ -154,7 +178,7 @@ namespace magic.lambda.mime.helpers
             writer.Flush();
             stream.Position = 0;
 
-            ContentEncoding encoding = ContentEncoding.Default;
+            var encoding = ContentEncoding.Default;
             var encodingNode = contentNode.Children.FirstOrDefault(x => x.Name == "Content-Encoding");
             if (encodingNode != null)
                 encoding = (ContentEncoding)Enum.Parse(typeof(ContentEncoding), encodingNode.GetEx<string>());
@@ -188,7 +212,11 @@ namespace magic.lambda.mime.helpers
             }
             var rootPath = new Node();
             signaler.Signal(".io.folder.root", rootPath);
-            part.Content = new MimeContent(File.OpenRead(rootPath.GetEx<string>() + filename.TrimStart('/')), encoding);
+            part.Content = new MimeContent(
+                File.OpenRead(
+                    rootPath.GetEx<string>() +
+                    filename.TrimStart('/')),
+                encoding);
         }
 
         /*
@@ -205,6 +233,9 @@ namespace magic.lambda.mime.helpers
             }
         }
 
+        /*
+         * Cryptographically signs an entity.
+         */
         static MultipartSigned Sign(
             MimeEntity entity,
             string key,
@@ -221,20 +252,26 @@ namespace magic.lambda.mime.helpers
             }
         }
 
-        static MultipartEncrypted Encrypt(MimeEntity entity, string key)
+        /*
+         * Encrypts an entity.
+         */
+        static MultipartEncrypted Encrypt(MimeEntity entity, Node encryptionNode)
         {
             using (var ctx = new PgpContext())
             {
                 return MultipartEncrypted.Encrypt(
                     ctx,
-                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(key) },
+                    GetEncryptionKeys(encryptionNode),
                     entity);
             }
         }
 
+        /*
+         * Cryptographically signs and encrypts an entity.
+         */
         static MultipartEncrypted SignAndEncrypt(
             MimeEntity entity,
-            string encryptionKey,
+            Node encryptionNode,
             string signingKey,
             string password)
         {
@@ -245,8 +282,37 @@ namespace magic.lambda.mime.helpers
                     ctx,
                     PgpHelpers.GetSecretKeyFromAsciiArmored(signingKey),
                     algo,
-                    new PgpPublicKey[] { PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey) },
+                    GetEncryptionKeys(encryptionNode),
                     entity);
+            }
+        }
+
+        /*
+         * Returns all public keys referenced in lambda object, somehow.
+         * Values can exist either as value of node, and/or valuesof children of node given.
+         */
+        static IEnumerable<PgpPublicKey> GetEncryptionKeys(Node encryptionKey)
+        {
+            // Returning any public encryption key found in value of node first.
+            if (encryptionKey.Value != null)
+            {
+                var result = PgpHelpers.GetPublicKeyFromAsciiArmored(encryptionKey.GetEx<string>());
+                if (!result.IsEncryptionKey)
+                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is not an encryption key");
+                if (result.IsRevoked())
+                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is revoked");
+                yield return result;
+            }
+
+            // Looping through children, in case caller provided a collection of encryption keys, that should all be used.
+            foreach (var idx in encryptionKey.Children)
+            {
+                var result = PgpHelpers.GetPublicKeyFromAsciiArmored(idx.GetEx<string>());
+                if (!result.IsEncryptionKey)
+                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is not an encryption key");
+                if (result.IsRevoked())
+                    throw new ArgumentException($"Key with fingerprint of '{PgpHelpers.GetFingerprint(result)}' is revoked");
+                yield return result;
             }
         }
 

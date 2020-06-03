@@ -283,6 +283,23 @@ mime.create
         }
 
         [Fact]
+        public void EncryptCollection()
+        {
+            var lambda = Common.Evaluate(string.Format(@"
+.key:@""{0}""
+mime.create
+   entity:text/plain
+      encrypt
+         .:x:@.key
+      content:Foo bar
+", PUBLIC_KEY));
+            var entity = lambda.Children.FirstOrDefault(x => x.Name == "mime.create");
+            Assert.Empty(entity.Children);
+            Assert.Contains(@"-----END PGP MESSAGE-----", entity.Get<string>());
+            Assert.Contains(@"Content-Type: application/pgp-encrypted", entity.Get<string>());
+        }
+
+        [Fact]
         public void SignAndEncrypt()
         {
             var lambda = Common.Evaluate(string.Format(@"
