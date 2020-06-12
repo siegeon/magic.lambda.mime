@@ -150,13 +150,9 @@ namespace magic.lambda.mime.helpers
             string subType,
             Node messageNode)
         {
-            // Retrieving [content] node.
-            var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
-                throw new ArgumentNullException("No [content] provided in [message]");
-
             var result = new Multipart(subType);
             DecorateEntityHeaders(result, messageNode);
-            foreach (var idxPart in contentNode.Children)
+            foreach (var idxPart in messageNode.Children.Where(x => x.Name == "entity"))
             {
                 result.Add(CreateEntity(signaler, idxPart));
             }
