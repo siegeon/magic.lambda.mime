@@ -160,18 +160,16 @@ foo bar", entity.ToString());
 
             // Creating a Multipart
             var node = new Node("");
-            var message = new Node("entity", "multipart/mixed");
-            var content = new Node("content");
+            var rootEntity = new Node("entity", "multipart/mixed");
+            node.Add(rootEntity);
+            var message1 = new Node("entity", "text/plain");
+            rootEntity.Add(message1);
+            var content1 = new Node("content", "some text");
+            message1.Add(content1);
             var message2 = new Node("entity", "text/plain");
-            var content2 = new Node("content", "some text");
-            content.Add(message2);
+            rootEntity.Add(message2);
+            var content2 = new Node("content", "some other text");
             message2.Add(content2);
-            var message3 = new Node("entity", "text/plain");
-            var content3 = new Node("content", "some other text");
-            content.Add(message3);
-            message3.Add(content3);
-            message.Add(content);
-            node.Add(message);
             signaler.Signal(".mime.create", node);
             var entity = node.Value as MimeEntity;
             try
