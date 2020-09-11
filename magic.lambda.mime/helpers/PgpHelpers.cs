@@ -110,6 +110,11 @@ namespace magic.lambda.mime.helpers
             }
         }
 
+        /// <summary>
+        /// Returns public key from armored ASCII key content.
+        /// </summary>
+        /// <param name="key">Armored text format containing key.</param>
+        /// <returns></returns>
         public static PgpPublicKey GetPublicKeyFromAsciiArmored(string key)
         {
             using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(key)))

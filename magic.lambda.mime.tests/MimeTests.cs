@@ -121,7 +121,7 @@ foo bar", entity.ToString());
             }
             finally
             {
-                Common.Dispose(entity);
+                Common.DisposeEntity(entity);
             }
         }
 
@@ -149,7 +149,7 @@ foo bar", entity.ToString());
             }
             finally
             {
-                Common.Dispose(entity);
+                Common.DisposeEntity(entity);
             }
         }
 
@@ -192,7 +192,7 @@ some other text", text2.ToString());
             }
             finally
             {
-                Common.Dispose(entity);
+                Common.DisposeEntity(entity);
             }
         }
     }

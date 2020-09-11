@@ -40,7 +40,7 @@ namespace magic.lambda.mime.helpers
         /// Helper method to dispose a MimeEntity's streams.
         /// </summary>
         /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
-        public static void Dispose(MimeEntity entity)
+        public static void DisposeEntity(MimeEntity entity)
         {
             if (entity is MimePart part)
             {
@@ -50,7 +50,7 @@ namespace magic.lambda.mime.helpers
             {
                 foreach (var idx in multi)
                 {
-                    Dispose(idx);
+                    DisposeEntity(idx);
                 }
             }
         }
@@ -126,7 +126,7 @@ namespace magic.lambda.mime.helpers
             // Retrieving [content] node.
             var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
                 messageNode.Children.FirstOrDefault(x => x.Name == "filename") ??
-                throw new ArgumentNullException("No [content] or [filename] provided in [entity]");
+                throw new ArgumentException("No [content] or [filename] provided in [entity]");
 
             var result = new MimePart(ContentType.Parse(mainType + "/" + subType));
             DecorateEntityHeaders(result, messageNode);
@@ -166,7 +166,7 @@ namespace magic.lambda.mime.helpers
         {
             var stream = new MemoryBlockStream();
             var content = contentNode.GetEx<string>() ??
-                throw new ArgumentNullException("No actual [content] supplied to message");
+                throw new ArgumentException("No actual [content] supplied to message");
             var writer = new StreamWriter(stream);
             writer.Write(content);
             writer.Flush();
@@ -187,7 +187,7 @@ namespace magic.lambda.mime.helpers
             Node contentNode,
             MimePart part)
         {
-            var filename = contentNode.GetEx<string>() ?? throw new ArgumentNullException("No [filename] value provided");
+            var filename = contentNode.GetEx<string>() ?? throw new ArgumentException("No [filename] value provided");
 
             // Checking if explicit encoding was supplied.
             ContentEncoding encoding = ContentEncoding.Default;

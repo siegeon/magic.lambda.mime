@@ -30,7 +30,7 @@ namespace magic.lambda.mime
             }
             finally
             {
-                MimeCreator.Dispose(entity);
+                MimeCreator.DisposeEntity(entity);
             }
         }
     }

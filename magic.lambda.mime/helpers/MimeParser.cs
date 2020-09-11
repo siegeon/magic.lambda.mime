@@ -24,6 +24,8 @@ namespace magic.lambda.mime.helpers
         /// </summary>
         /// <param name="node">Node containing the MIME message as value, and also where the lambda structure representing the parsed message will be placed.</param>
         /// <param name="entity">MimeEntity to parse.</param>
+        /// <param name="keyFunc">Function to retrieve PGP key in armored text format.</param>
+        /// <param name="passwordFunc">Function to retrieve password for PGP key to decrypt it.</param>
         public static void Parse(
             Node node,
             MimeEntity entity,
@@ -41,7 +43,7 @@ namespace magic.lambda.mime.helpers
         /// Helper method to dispose a MimeEntity's streams.
         /// </summary>
         /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
-        public static void Dispose(MimeEntity entity)
+        public static void DisposeEntity(MimeEntity entity)
         {
             if (entity is MimePart part)
             {
@@ -51,7 +53,7 @@ namespace magic.lambda.mime.helpers
             {
                 foreach (var idx in multi)
                 {
-                    Dispose(idx);
+                    DisposeEntity(idx);
                 }
             }
         }

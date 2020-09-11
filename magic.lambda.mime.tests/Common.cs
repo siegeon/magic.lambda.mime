@@ -34,7 +34,7 @@ namespace magic.lambda.mime.tests
             return services.GetService(typeof(ISignaler)) as ISignaler;
         }
 
-        public static void Dispose(MimeEntity entity)
+        public static void DisposeEntity(MimeEntity entity)
         {
             if (entity is MimePart part)
             {
@@ -44,7 +44,7 @@ namespace magic.lambda.mime.tests
             {
                 foreach (var idx in multi)
                 {
-                    Dispose(idx);
+                    DisposeEntity(idx);
                 }
             }
         }

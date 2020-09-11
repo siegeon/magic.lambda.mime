@@ -32,9 +32,9 @@ namespace magic.lambda.mime
         {
             // Sanity checking invocation.
             var keyPlainText = input.GetEx<string>() ?? 
-                throw new ArgumentNullException("No value provided to [pgp.keys.private.import]");
+                throw new ArgumentException("No value provided to [pgp.keys.private.import]");
             var lambda = input.Children.FirstOrDefault(x => x.Name == ".lambda") ??
-                throw new ArgumentNullException("No [.lambda] provided to [pgp.keys.private.import]");
+                throw new ArgumentException("No [.lambda] provided to [pgp.keys.private.import]");
 
             // Unwrapping key(s) and iterating through them, importing them one at the time.
             using (var memStream = new MemoryStream(Encoding.UTF8.GetBytes(keyPlainText)))
