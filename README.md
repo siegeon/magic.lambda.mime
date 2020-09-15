@@ -41,6 +41,8 @@ After evaluating the above, you'll end up with something resembling the followin
 ```
 mime.parse
    entity:multipart/mixed
+      headers
+         MIME-Version:1.0
       entity:text/plain
          content:this is the body text
       entity:text/plain
@@ -52,6 +54,7 @@ MIME headers for you, adding these into a **[headers]** collection, on a per mes
 your message actually contains headers or not.
 
 The **[.mime.parse]** semantically works identically, except it requires as its input a raw `MimeEntity` object from MimeKit.
+The **[.mime.parse]** slot can of course only be invoked from C#, since it starts with a _"."_.
 
 ## Creating a mime message
 
