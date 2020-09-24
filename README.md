@@ -122,7 +122,9 @@ encryption key, using **[encrypt]**. If you wish to encrypt the same message for
 of public PGP keys that will be used to encrypt the message, such as follows.
 
 **Notice** - Due to an API flaw in MimeKit, and how it looks up private PGP key during parsing end decrypting of MIME messages,
-the project does not support _decrypting_ of messages yet.
+the project does not support _decrypting_ of messages yet. Once MimeKit implements alternative PGP key storages, or at least
+hooks to supply your own custom storage, not tied to Gnu Privacy Guard, we might reconsider and support decrypting of MIME
+messages.
 
 ```
 mime.create
