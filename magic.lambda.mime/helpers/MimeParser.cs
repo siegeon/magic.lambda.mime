@@ -10,7 +10,6 @@ using MimeKit.IO;
 using MimeKit.Cryptography;
 using magic.node;
 using System;
-using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace magic.lambda.mime.helpers
 {
@@ -24,19 +23,9 @@ namespace magic.lambda.mime.helpers
         /// </summary>
         /// <param name="node">Node containing the MIME message as value, and also where the lambda structure representing the parsed message will be placed.</param>
         /// <param name="entity">MimeEntity to parse.</param>
-        /// <param name="keyFunc">Function to retrieve PGP key in armored text format.</param>
-        /// <param name="passwordFunc">Function to retrieve password for PGP key to decrypt it.</param>
-        public static void Parse(
-            Node node,
-            MimeEntity entity,
-            Func<string, string> keyFunc,
-            Func<PgpSecretKey, string> passwordFunc)
+        public static void Parse(Node node, MimeEntity entity)
         {
-            ParseImplementation(
-                node,
-                entity,
-                keyFunc,
-                passwordFunc);
+            ParseImplementation(node, entity);
         }
 
         /// <summary>
@@ -60,11 +49,7 @@ namespace magic.lambda.mime.helpers
 
         #region [ -- Private helper methods -- ]
 
-        private static void ParseImplementation(
-            Node node,
-            MimeEntity entity,
-            Func<string, string> keyFunc,
-            Func<PgpSecretKey, string> passwordFunc)
+        private static void ParseImplementation(Node node, MimeEntity entity)
         {
             var tmp = new Node("entity", entity.ContentType.MimeType);
             ProcessHeaders(tmp, entity);
@@ -84,22 +69,19 @@ namespace magic.lambda.mime.helpers
                 // Then traversing content of multipart/signed message.
                 foreach (var idx in signed)
                 {
-                    ParseImplementation(tmp, idx, keyFunc, passwordFunc);
+                    ParseImplementation(tmp, idx);
                 }
             }
-            else if (entity is MultipartEncrypted enc)
+            else if (entity is MultipartEncrypted)
             {
-                var secretKey = PgpHelpers.GetSecretKeyRingFromAsciiArmored(keyFunc(null));
-                var decryptedEntity = enc.Decrypt();
-                tmp.Add(new Node("fingerprint", PgpHelpers.GetFingerprint(secretKey.GetPublicKey())));
-                ParseImplementation(tmp, decryptedEntity, keyFunc, passwordFunc);
+                throw new ArgumentException("Magic currently does not support decrypting MIME messages");
             }
             else if (entity is Multipart multi)
             {
                 // Multipart content.
                 foreach (var idx in multi)
                 {
-                    ParseImplementation(tmp, idx, keyFunc, passwordFunc);
+                    ParseImplementation(tmp, idx);
                 }
             }
             else if (entity is TextPart text)

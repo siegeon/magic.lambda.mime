@@ -25,17 +25,7 @@ namespace magic.lambda.mime
         public void Signal(ISignaler signaler, Node input)
         {
             var message = input.Value as MimeEntity;
-            helpers.MimeParser.Parse(
-                input,
-                message,
-                (fingerprint) => input.Children
-                    .FirstOrDefault(x => x.Name == "key")?
-                    .GetEx<string>(),
-                (sec) => input.Children
-                    .FirstOrDefault(x => x.Name == "key")?
-                    .Children
-                    .FirstOrDefault(x => x.Name == "password")?
-                    .GetEx<string>());
+            helpers.MimeParser.Parse(input, message);
             input.Value = null;
         }
     }
