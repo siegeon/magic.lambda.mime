@@ -31,17 +31,7 @@ namespace magic.lambda.mime
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
                 {
                     var message = MimeEntity.Load(stream);
-                    helpers.MimeParser.Parse(
-                        input,
-                        message,
-                        (fingerprint) => input.Children
-                            .FirstOrDefault(x => x.Name == "key")?
-                            .GetEx<string>(),
-                        (sec) => input.Children
-                            .FirstOrDefault(x => x.Name == "key")?
-                            .Children
-                            .FirstOrDefault(x => x.Name == "password")?
-                            .GetEx<string>());
+                    helpers.MimeParser.Parse(input, message);
                     input.Value = null;
                 }
             }
