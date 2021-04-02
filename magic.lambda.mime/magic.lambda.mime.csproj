@@ -6,7 +6,7 @@
     <PackageId>magic.lambda.mime</PackageId>
     <Authors>Thomas Hansen</Authors>
     <Company>Thomas Hansen</Company>
-    <Copyright>Thomas Hansen, thomas@gaiasoul.com</Copyright>
+    <Copyright>Thomas Hansen, thomas@servergardens.com</Copyright>
     <Description>MIME helpers for Magic built on MimeKit, allowing you to easily construct and parse MIME messages. Combined with magic.lambda.mail, it also gives you sending and retrieving of emails capability. To use package go to https://polterguy.github.io</Description>
     <PackageProjectUrl>https://github.com/polterguy/magic.lambda.mime</PackageProjectUrl>
     <PackOnBuild>true</PackOnBuild>
@@ -26,7 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="../ico.png" Pack="true" PackagePath="$(PackageIcon)"/>
+    <None Include="../ico.png" Pack="true" PackagePath="$(PackageIcon)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,9 +38,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="magic.node.extensions" Version="8.9.*" />
-    <PackageReference Include="magic.signals.contracts" Version="8.9.*" />
-    <PackageReference Include="MimeKit" Version="2.8.0" />
+    <PackageReference Include="magic.node.extensions" Version="8.9.9" />
+    <PackageReference Include="magic.signals.contracts" Version="8.9.9" />
+    <PackageReference Include="MimeKit" Version="2.11.0" />
   </ItemGroup>
 
 </Project>

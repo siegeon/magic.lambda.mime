@@ -115,7 +115,8 @@ Hello World!";
             var entity = node.Value as MimeEntity;
             try
             {
-                Assert.Equal(@"Content-Type: text/plain
+                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
+Content-Type: text/plain
 
 foo bar", entity.ToString());
             }
@@ -142,7 +143,8 @@ foo bar", entity.ToString());
             var entity = node.Value as MimeEntity;
             try
             {
-                Assert.Equal(@"Content-Type: text/plain
+                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
+Content-Type: text/plain
 Foo-Bar: howdy
 
 foo bar", entity.ToString());
@@ -182,11 +184,13 @@ foo bar", entity.ToString());
                 Assert.Equal(typeof(MimePart), multipart.First().GetType());
                 Assert.Equal(typeof(MimePart), multipart.Skip(1).First().GetType());
                 var text1 = multipart.First() as MimePart;
-                Assert.Equal(@"Content-Type: text/plain
+                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
+Content-Type: text/plain
 
 some text", text1.ToString());
                 var text2 = multipart.Skip(1).First() as MimePart;
-                Assert.Equal(@"Content-Type: text/plain
+                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
+Content-Type: text/plain
 
 some other text", text2.ToString());
             }
