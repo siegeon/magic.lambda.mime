@@ -10,7 +10,7 @@
     <Description>MIME helpers for Magic built on MimeKit, allowing you to easily construct and parse MIME messages. Combined with magic.lambda.mail, it also gives you sending and retrieving of emails capability. To use package go to https://polterguy.github.io</Description>
     <PackageProjectUrl>https://github.com/polterguy/magic.lambda.mime</PackageProjectUrl>
     <PackOnBuild>true</PackOnBuild>
-    <PackageVersion>8.9.9</PackageVersion>
+    <PackageVersion>9.0.0</PackageVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/polterguy/magic.lambda.mime.git</RepositoryUrl>
@@ -38,8 +38,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="magic.node.extensions" Version="8.9.9" />
-    <PackageReference Include="magic.signals.contracts" Version="8.9.9" />
+    <PackageReference Include="magic.node.extensions" Version="9.0.0" />
+    <PackageReference Include="magic.signals.contracts" Version="9.0.0" />
     <PackageReference Include="MimeKit" Version="2.11.0" />
   </ItemGroup>
 
