@@ -75,6 +75,7 @@ namespace magic.lambda.mime.helpers
             var subType = tokens[1];
             switch (mainType)
             {
+                case "application":
                 case "text":
                     result = CreateLeafPart(signaler, mainType, subType, input);
                     break;
