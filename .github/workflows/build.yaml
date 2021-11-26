@@ -19,7 +19,6 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: sonarscan-dotnet
         uses: highbyte/sonarscan-dotnet@v2.1.2
-        
-  env:
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
