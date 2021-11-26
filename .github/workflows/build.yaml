@@ -21,6 +21,7 @@ jobs:
           sonarOrganization: polterguy
           dotnetBuildArguments: ./magic.lambda.mime/magic.lambda.mime.csproj
           dotnetTestArguments: ./magic.lambda.mime.tests/magic.lambda.mime.tests.csproj --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/*.trx"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
