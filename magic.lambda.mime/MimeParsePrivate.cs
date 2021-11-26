@@ -23,7 +23,6 @@ namespace magic.lambda.mime
         {
             var message = input.Value as MimeEntity;
             helpers.MimeParser.Parse(input, message);
-            input.Value = null;
         }
     }
 }

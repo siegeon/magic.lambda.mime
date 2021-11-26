@@ -25,18 +25,10 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            try
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
             {
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
-                {
-                    var message = MimeEntity.Load(stream);
-                    helpers.MimeParser.Parse(input, message);
-                    input.Value = null;
-                }
-            }
-            finally
-            {
-                input.Children.FirstOrDefault(x => x.Name == "key")?.UnTie();
+                var message = MimeEntity.Load(stream);
+                helpers.MimeParser.Parse(input, message);
             }
         }
     }

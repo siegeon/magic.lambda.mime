@@ -7,11 +7,9 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using MimeKit;
-using MimeKit.Cryptography;
 using magic.node;
 using magic.signals.services;
 using magic.signals.contracts;
-using magic.lambda.mime.helpers;
 using magic.node.extensions.hyperlambda;
 
 namespace magic.lambda.mime.tests
@@ -52,7 +50,6 @@ namespace magic.lambda.mime.tests
 
         static IServiceProvider Initialize()
         {
-            CryptographyContext.Register(typeof(CreatePgpMimeContext));
             var services = new ServiceCollection();
             services.AddTransient<ISignaler, Signaler>();
             var types = new SignalsProvider(InstantiateAllTypes<ISlot>(services));

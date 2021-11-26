@@ -13,74 +13,6 @@ namespace magic.lambda.mime.tests
     public class MimeTests
     {
         [Fact]
-        public void ParseMultipartMessage()
-        {
-            string mimeMessage = @"Content-Type: multipart/mixed;
-        boundary=""XXXXboundary text""
-
-This is a multipart message in MIME format.
-
---XXXXboundary text
-Content-Type: text/plain
-
-this is the body text
---XXXXboundary text
-Content-Type: text/plain;
-
-this is another body text
---XXXXboundary text--";
-            var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
-            Assert.Single(lambda.Children.First().Children);
-            Assert.Equal("entity",
-                lambda.Children.First().Children.First().Name);
-            Assert.Equal("multipart/mixed",
-                lambda.Children.First().Children.First().GetEx<string>());
-            Assert.Equal(2,
-                lambda.Children.First().Children.First().Children.Count());
-            Assert.Equal("entity",
-                lambda.Children.First().Children.First().Children.First().Name);
-            Assert.Equal("text/plain",
-                lambda.Children.First().Children.First().Children.First().GetEx<string>());
-            Assert.Equal("entity",
-                lambda.Children.First().Children.First().Children.Skip(1).First().Name);
-            Assert.Equal("text/plain",
-                lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
-            Assert.Equal("content",
-                lambda.Children.First().Children.First().Children.First().Children.First().Name);
-            Assert.Equal("this is the body text",
-                lambda.Children.First().Children.First().Children.First().Children.First().GetEx<string>());
-            Assert.Equal("content",
-                lambda.Children.First().Children.First().Children.Skip(1).First().Children.First().Name);
-            Assert.Equal("this is another body text",
-                lambda.Children.First().Children.First().Children.Skip(1).First().Children.First().GetEx<string>());
-        }
-
-        [Fact]
-        public void ParseMessageWithHeaders()
-        {
-            string mimeMessage = @"Content-Type: text/plain
-Content-Disposition: inline
-
-Hello World!";
-            var lambda = Common.Evaluate($"mime.parse:@\"{mimeMessage.Replace(@"""", @"""""")}\"");
-            Assert.Single(lambda.Children.First().Children);
-            Assert.Equal("entity",
-                lambda.Children.First().Children.First().Name);
-            Assert.Equal("text/plain",
-                lambda.Children.First().Children.First().GetEx<string>());
-            Assert.Equal("headers",
-                lambda.Children.First().Children.First().Children.First().Name);
-            Assert.Equal("Content-Disposition",
-                lambda.Children.First().Children.First().Children.First().Children.First().Name);
-            Assert.Equal("inline",
-                lambda.Children.First().Children.First().Children.First().Children.First().GetEx<string>());
-            Assert.Equal("content",
-                lambda.Children.First().Children.First().Children.Skip(1).First().Name);
-            Assert.Equal("Hello World!",
-                lambda.Children.First().Children.First().Children.Skip(1).First().GetEx<string>());
-        }
-
-        [Fact]
         public void ParseRawMessage()
         {
             var entity = new TextPart("plain")
@@ -90,32 +22,23 @@ Hello World!";
             var lambda = new Node("", entity);
             var signaler = Common.GetSignaler();
             signaler.Signal(".mime.parse", lambda);
-            Assert.Single(lambda.Children.First().Children);
-            Assert.Equal("entity",
-                lambda.Children.First().Name);
-            Assert.Equal("text/plain",
-                lambda.Children.First().GetEx<string>());
-            Assert.Equal("content",
-                lambda.Children.First().Children.First().Name);
-            Assert.Equal("Hello World!",
-                lambda.Children.First().Children.First().GetEx<string>());
+            Assert.Equal("text/plain", lambda.GetEx<string>());
+            Assert.Equal("content", lambda.Children.First().Name);
+            Assert.Equal("Hello World!", lambda.Children.First().GetEx<string>());
         }
 
         [Fact]
         public void CreateSimpleMessage()
         {
             var signaler = Common.GetSignaler();
-            var node = new Node("");
-            var message = new Node("entity", "text/plain");
+            var node = new Node("", "text/plain");
             var content = new Node("content", "foo bar");
-            message.Add(content);
-            node.Add(message);
+            node.Add(content);
             signaler.Signal(".mime.create", node);
             var entity = node.Value as MimeEntity;
             try
             {
-                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
-Content-Type: text/plain
+                Assert.Equal(@"Content-Type: text/plain
 
 foo bar", entity.ToString());
             }
@@ -129,21 +52,18 @@ foo bar", entity.ToString());
         public void CreateMessageWithHeaders()
         {
             var signaler = Common.GetSignaler();
-            var node = new Node("");
-            var message = new Node("entity", "text/plain");
+            var node = new Node("", "text/plain");
             var content = new Node("content", "foo bar");
-            message.Add(content);
+            node.Add(content);
             var headers = new Node("headers");
-            message.Add(headers);
+            node.Add(headers);
             var header = new Node("Foo-Bar", "howdy");
             headers.Add(header);
-            node.Add(message);
             signaler.Signal(".mime.create", node);
             var entity = node.Value as MimeEntity;
             try
             {
-                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
-Content-Type: text/plain
+                Assert.Equal(@"Content-Type: text/plain
 Foo-Bar: howdy
 
 foo bar", entity.ToString());
@@ -160,15 +80,13 @@ foo bar", entity.ToString());
             var signaler = Common.GetSignaler();
 
             // Creating a Multipart
-            var node = new Node("");
-            var rootEntity = new Node("entity", "multipart/mixed");
-            node.Add(rootEntity);
+            var node = new Node("", "multipart/mixed");
             var message1 = new Node("entity", "text/plain");
-            rootEntity.Add(message1);
+            node.Add(message1);
             var content1 = new Node("content", "some text");
             message1.Add(content1);
             var message2 = new Node("entity", "text/plain");
-            rootEntity.Add(message2);
+            node.Add(message2);
             var content2 = new Node("content", "some other text");
             message2.Add(content2);
             signaler.Signal(".mime.create", node);
@@ -183,13 +101,11 @@ foo bar", entity.ToString());
                 Assert.Equal(typeof(MimePart), multipart.First().GetType());
                 Assert.Equal(typeof(MimePart), multipart.Skip(1).First().GetType());
                 var text1 = multipart.First() as MimePart;
-                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
-Content-Type: text/plain
+                Assert.Equal(@"Content-Type: text/plain
 
 some text", text1.ToString());
                 var text2 = multipart.Skip(1).First() as MimePart;
-                Assert.Equal(@"X-MimeKit-Warning: Do NOT use ToString() to serialize entities! Use one of the WriteTo() methods instead!
-Content-Type: text/plain
+                Assert.Equal(@"Content-Type: text/plain
 
 some other text", text2.ToString());
             }
