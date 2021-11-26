@@ -12,11 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - name: sonarscan-dotnet
         uses: highbyte/sonarscan-dotnet@v2.1.2
         with:
-          sonarProjectKey: polterguy
+          sonarProjectKey: polterguy_magic.lambda.mime
           sonarProjectName:  magic.lambda.mime
           sonarOrganization: polterguy
           dotnetBuildArguments: ./magic.lambda.mime/magic.lambda.mime.csproj
