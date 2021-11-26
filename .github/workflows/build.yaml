@@ -16,8 +16,8 @@ jobs:
           sonarProjectKey: polterguy
           sonarProjectName:  magic.lambda.mime
           sonarOrganization: polterguy
-          dotnetBuildArguments: ../../magic.lambda.mime/magic.lambda.mime.csproj
-          dotnetTestArguments: ../../magic.lambda.mime.tests/magic.lambda.mime.tests.csproj
+          dotnetBuildArguments: ../magic.lambda.mime/magic.lambda.mime.csproj
+          dotnetTestArguments: ../magic.lambda.mime.tests/magic.lambda.mime.tests.csproj
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
