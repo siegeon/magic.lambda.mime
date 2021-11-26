@@ -47,9 +47,10 @@ jobs:
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"polterguy_magic.lambda.mime" /o:"polterguy" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml /d:sonar.cs.vstest.reportsPaths=**/*.trx
           cd magic.lambda.mime
-          dotnet restore
+          dotnet restore magic.lambda.mime.csproj
           dotnet build magic.lambda.mime.csproj --configuration Release --no-restore
           cd ..
           cd magic.lambda.mime.tests
+          dotnet restore magic.lambda.mime.tests.csproj
           dotnet test magic.lambda.mime.tests.csproj --verbosity normal --no-restore --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
