@@ -13,9 +13,9 @@ jobs:
       - name: sonarscan-dotnet
         uses: highbyte/sonarscan-dotnet@v2.1.2
         with:
-          - sonarProjectKey: polterguy
-          - sonarProjectName:  magic.lambda.mime
-          - sonarOrganization: polterguy
+          sonarProjectKey: polterguy
+          sonarProjectName:  magic.lambda.mime
+          sonarOrganization: polterguy
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
