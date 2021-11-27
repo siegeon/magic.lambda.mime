@@ -4,16 +4,23 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using MimeKit;
 using magic.node;
 using magic.signals.services;
 using magic.signals.contracts;
+using magic.lambda.io.contracts;
 using magic.node.extensions.hyperlambda;
 
 namespace magic.lambda.mime.tests
 {
+    internal class RootResolver : IRootResolver
+    {
+        public string RootFolder => Assembly.GetCallingAssembly().Location.Substring(0, Assembly.GetCallingAssembly().Location.LastIndexOf("/") + 1);
+    }
+
     public static class Common
     {
         static public Node Evaluate(string hl)
@@ -52,6 +59,7 @@ namespace magic.lambda.mime.tests
         {
             var services = new ServiceCollection();
             services.AddTransient<ISignaler, Signaler>();
+            services.AddTransient<IRootResolver, RootResolver>();
             var types = new SignalsProvider(InstantiateAllTypes<ISlot>(services));
             services.AddTransient<ISignalsProvider>((svc) => types);
             var provider = services.BuildServiceProvider();

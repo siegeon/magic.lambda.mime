@@ -2,6 +2,7 @@
  * Magic Cloud, copyright Aista, Ltd. See the attached LICENSE file for details.
  */
 
+using System;
 using System.Linq;
 using Xunit;
 using MimeKit;
@@ -46,6 +47,98 @@ foo bar", entity.ToString());
             {
                 Common.DisposeEntity(entity);
             }
+        }
+
+        [Fact]
+        public void WithContentEncoding()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            var content = new Node("content", "foo bar");
+            node.Add(content);
+            var encoding = new Node("Content-Encoding", "default");
+            content.Add(encoding);
+            signaler.Signal(".mime.create", node);
+            var entity = node.Value as MimeEntity;
+            try
+            {
+                Assert.Equal(@"Content-Type: text/plain
+
+foo bar", entity.ToString());
+            }
+            finally
+            {
+                Common.DisposeEntity(entity);
+            }
+        }
+
+        [Fact]
+        public void CreateFromFilename()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            var content = new Node("filename", "/test.txt");
+            node.Add(content);
+            signaler.Signal(".mime.create", node);
+            var entity = node.Value as MimeEntity;
+            try
+            {
+                Assert.Contains("Content-Disposition: attachment; filename=test.txt", entity.ToString());
+                Assert.Contains("Content-Type: text/plain", entity.ToString());
+                Assert.Contains("Some example test file used as attachment", entity.ToString());
+            }
+            finally
+            {
+                Common.DisposeEntity(entity);
+            }
+        }
+
+        [Fact]
+        public void WrongContentType_THROWS_01()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text-plain");
+            var content = new Node("content", "foo bar");
+            node.Add(content);
+            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+        }
+
+        [Fact]
+        public void WrongContentType_THROWS_02()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain/foo");
+            var content = new Node("content", "foo bar");
+            node.Add(content);
+            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+        }
+
+        [Fact]
+        public void WrongContentType_THROWS_03()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "APPLICATION/octet-stream");
+            var content = new Node("content", "foo bar");
+            node.Add(content);
+            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+        }
+
+        [Fact]
+        public void WrongContentType_THROWS_04()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+        }
+
+        [Fact]
+        public void WrongContentType_THROWS_05()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            var content = new Node("content");
+            node.Add(content);
+            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
         }
 
         [Fact]

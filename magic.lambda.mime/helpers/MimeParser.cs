@@ -37,8 +37,7 @@ namespace magic.lambda.mime.helpers
             }
             else if (entity is TextPart text)
             {
-                // Singular content type.
-                // Notice! We don't really care about the encoding the text was encoded with.
+                // Test type of entity.
                 node.Add(new Node("content", text.GetText(out var _)));
             }
             else if (entity is MimePart part)

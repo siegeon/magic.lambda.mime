@@ -24,5 +24,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\magic.lambda.mime\magic.lambda.mime.csproj" />
+    <PackageReference Include="magic.signals.contracts" Version="9.9.3" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="test.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
