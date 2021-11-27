@@ -4,6 +4,7 @@
 
 using System;
 using System.Linq;
+using System.Text;
 using Xunit;
 using MimeKit;
 using magic.node;
@@ -61,12 +62,18 @@ foo bar", node.Get<string>());
         {
             var signaler = Common.GetSignaler();
             var node = new Node("", "multipart/mixed");
-            var entity1 = new Node("entity", "text/plain");
+            var entity1 = new Node("entity", "application/octet-stream");
             entity1.Add(new Node("content", "foo bar 1"));
             node.Add(entity1);
             var entity2 = new Node("entity", "text/plain");
             entity2.Add(new Node("content", "foo bar 2"));
             node.Add(entity2);
+            var entity3 = new Node("entity", "text/plain");
+            var headers3 = new Node("headers");
+            headers3.Add(new Node("X-Foo", "bar"));
+            entity3.Add(headers3);
+            entity3.Add(new Node("filename", "/test.txt"));
+            node.Add(entity3);
             signaler.Signal("mime.create", node);
 
             // Reversing process.
@@ -76,13 +83,22 @@ foo bar", node.Get<string>());
             Assert.Equal("", result.Name);
             Assert.Equal("multipart/mixed", result.Value);
             Assert.Equal("entity", result.Children.First().Name);
-            Assert.Equal("text/plain", result.Children.First().Value);
+            Assert.Equal("application/octet-stream", result.Children.First().Value);
             Assert.Equal("entity", result.Children.Skip(1).First().Name);
             Assert.Equal("text/plain", result.Children.Skip(1).First().Value);
+            Assert.Equal("entity", result.Children.Skip(2).First().Name);
+            Assert.Equal("text/plain", result.Children.Skip(2).First().Value);
             Assert.Equal("content", result.Children.First().Children.First().Name);
-            Assert.Equal("foo bar 1", result.Children.First().Children.First().Value);
+            Assert.Equal("foo bar 1", Encoding.UTF8.GetString(result.Children.First().Children.First().Get<byte[]>()));
             Assert.Equal("content", result.Children.Skip(1).First().Children.First().Name);
             Assert.Equal("foo bar 2", result.Children.Skip(1).First().Children.First().Value);
+            Assert.Equal("headers", result.Children.Skip(2).First().Children.First().Name);
+            Assert.Equal("X-Foo", result.Children.Skip(2).First().Children.First().Children.First().Name);
+            Assert.Equal("bar", result.Children.Skip(2).First().Children.First().Children.First().Value);
+            Assert.Equal("Content-Disposition", result.Children.Skip(2).First().Children.First().Children.Skip(1).First().Name);
+            Assert.Equal("attachment; filename=test.txt", result.Children.Skip(2).First().Children.First().Children.Skip(1).First().Value);
+            Assert.Equal("content", result.Children.Skip(2).First().Children.Skip(1).First().Name);
+            Assert.Equal("Some example test file used as attachment", result.Children.Skip(2).First().Children.Skip(1).First().Value);
         }
 
         [Fact]
