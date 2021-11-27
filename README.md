@@ -66,9 +66,9 @@ can also only be invoked from C# since it starts with a period (.) as its name.
 
 ## Cryptography
 
-**Notice** - The PGP parts was take out of the library starting from version 9.9.8, since it was a piece of gabbage, due to
-dependencies upon GnuPG, the file system, etc. At some point we might re-introduce these parts into the library, but if this
-is a problem, make sure you use a version _before_ version 9.9.8 of the library.
+**Notice** - The PGP parts was take out of the library starting from version 9.9.8, since it was a piece of cabbage, due to
+dependencies upon GnuPG, the local file system to resolve PGP key pairs, etc. At some point we might re-introduce these parts
+into the library, but if this is a problem for you, make sure you use a version _before_ version 9.9.8 of the library.
 
 ## Project website
 
@@ -76,6 +76,7 @@ The source code for this repository can be found at [github.com/polterguy/magic.
 
 ## Quality gates
 
+- ![Build status](https://github.com/polterguy/magic.lambda.mime/actions/workflows/build.yaml/badge.svg)
 - [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=polterguy_magic.lambda.mime&metric=alert_status)](https://sonarcloud.io/dashboard?id=polterguy_magic.lambda.mime)
 - [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=polterguy_magic.lambda.mime&metric=bugs)](https://sonarcloud.io/dashboard?id=polterguy_magic.lambda.mime)
 - [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=polterguy_magic.lambda.mime&metric=code_smells)](https://sonarcloud.io/dashboard?id=polterguy_magic.lambda.mime)
