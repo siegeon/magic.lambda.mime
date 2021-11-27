@@ -113,8 +113,7 @@ foo bar", entity.ToString());
             var node = new Node("", "text/plain");
             var content = new Node("content", "foo bar");
             node.Add(content);
-            var encoding = new Node("Content-Encoding", "default");
-            content.Add(encoding);
+            content.Add(new Node("Content-Encoding", "default"));
             signaler.Signal(".mime.create", node);
             var entity = node.Value as MimeEntity;
             try
@@ -122,6 +121,30 @@ foo bar", entity.ToString());
                 Assert.Equal(@"Content-Type: text/plain
 
 foo bar", entity.ToString());
+            }
+            finally
+            {
+                Common.DisposeEntity(entity);
+            }
+        }
+
+        [Fact]
+        public void WithHeaders()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            var content = new Node("content", "foo bar");
+            var headers = new Node("headers");
+            headers.Add(new Node("X-Foo", "bar"));
+            node.Add(headers);
+            node.Add(content);
+            signaler.Signal(".mime.create", node);
+            var entity = node.Value as MimeEntity;
+            try
+            {
+                Assert.Contains("X-Foo: bar", entity.ToString());
+                Assert.Contains("Content-Type: text/plain", entity.ToString());
+                Assert.Contains("foo bar", entity.ToString());
             }
             finally
             {
