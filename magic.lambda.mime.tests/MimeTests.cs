@@ -14,6 +14,21 @@ namespace magic.lambda.mime.tests
     public class MimeTests
     {
         [Fact]
+        public void ParseMessage()
+        {
+            var entity = new TextPart("plain")
+            {
+                Text = "Hello World!"
+            };
+            var lambda = new Node("", entity.ToString());
+            var signaler = Common.GetSignaler();
+            signaler.Signal("mime.parse", lambda);
+            Assert.Equal("text/plain", lambda.GetEx<string>());
+            Assert.Equal("content", lambda.Children.First().Name);
+            Assert.Equal("Hello World!", lambda.Children.First().GetEx<string>());
+        }
+
+        [Fact]
         public void ParseRawMessage()
         {
             var entity = new TextPart("plain")
@@ -30,6 +45,48 @@ namespace magic.lambda.mime.tests
 
         [Fact]
         public void CreateSimpleMessage()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            var content = new Node("content", "foo bar");
+            node.Add(content);
+            signaler.Signal("mime.create", node);
+            Assert.Equal(@"Content-Type: text/plain
+
+foo bar", node.Get<string>());
+        }
+
+        [Fact]
+        public void CreateMultipart()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "multipart/mixed");
+            var entity1 = new Node("entity", "text/plain");
+            entity1.Add(new Node("content", "foo bar 1"));
+            node.Add(entity1);
+            var entity2 = new Node("entity", "text/plain");
+            entity2.Add(new Node("content", "foo bar 2"));
+            node.Add(entity2);
+            signaler.Signal("mime.create", node);
+
+            // Reversing process.
+            var result = new Node("", node.Get<string>());
+            signaler.Signal("mime.parse", result);
+
+            Assert.Equal("", result.Name);
+            Assert.Equal("multipart/mixed", result.Value);
+            Assert.Equal("entity", result.Children.First().Name);
+            Assert.Equal("text/plain", result.Children.First().Value);
+            Assert.Equal("entity", result.Children.Skip(1).First().Name);
+            Assert.Equal("text/plain", result.Children.Skip(1).First().Value);
+            Assert.Equal("content", result.Children.First().Children.First().Name);
+            Assert.Equal("foo bar 1", result.Children.First().Children.First().Value);
+            Assert.Equal("content", result.Children.Skip(1).First().Children.First().Name);
+            Assert.Equal("foo bar 2", result.Children.Skip(1).First().Children.First().Value);
+        }
+
+        [Fact]
+        public void CreateSimpleMessageRaw()
         {
             var signaler = Common.GetSignaler();
             var node = new Node("", "text/plain");
