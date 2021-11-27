@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\magic.lambda.mime\magic.lambda.mime.csproj" />
     <PackageReference Include="magic.signals.contracts" Version="9.9.3" />
+    <PackageReference Include="magic.lambda.io" Version="9.9.4" />
   </ItemGroup>
 
   <ItemGroup>
