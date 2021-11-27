@@ -4,6 +4,7 @@
 
 using MimeKit;
 using magic.node;
+using magic.node.extensions;
 using magic.signals.contracts;
 
 namespace magic.lambda.mime
@@ -21,7 +22,7 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            var message = input.Value as MimeEntity;
+            var message = input.Get<MimeEntity>();
             helpers.MimeParser.Parse(input, message);
         }
     }

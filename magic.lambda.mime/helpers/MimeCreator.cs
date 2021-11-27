@@ -27,7 +27,29 @@ namespace magic.lambda.mime.helpers
         /// <returns>A MIME entity object encapsulating the specified lambda object</returns>
         public static MimeEntity Create(ISignaler signaler, Node input)
         {
-            return CreateEntity(signaler, input);
+            // Finding Content-Type of entity.
+            var type = input.GetEx<string>();
+            if (!type.Contains("/"))
+                throw new ArgumentException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
+
+            var tokens = type.Split('/');
+            if (tokens.Length != 2)
+                throw new ArgumentException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
+
+            var mainType = tokens[0];
+            var subType = tokens[1];
+            switch (mainType)
+            {
+                case "application":
+                case "text":
+                    return CreateLeafPart(signaler, mainType, subType, input);
+
+                case "multipart":
+                    return CreateMultipart(signaler, subType, input);
+
+                default:
+                    throw new ArgumentException($"I don't know how to handle the '{type}' MIME type.");
+            }
         }
 
         /// <summary>
@@ -52,34 +74,6 @@ namespace magic.lambda.mime.helpers
         #region [ -- Private helper methods -- ]
 
         /*
-         * Create MimeEntity, or MIME part to be specific.
-         */
-        static MimeEntity CreateEntity(ISignaler signaler, Node input)
-        {
-            // Finding Content-Type of entity.
-            var type = input.GetEx<string>();
-            if (!type.Contains("/"))
-                throw new ArgumentException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
-
-            var tokens = type.Split('/');
-            if (tokens.Length != 2)
-                throw new ArgumentException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
-
-            var mainType = tokens[0];
-            var subType = tokens[1];
-            switch (mainType)
-            {
-                case "application":
-                case "text":
-                    return CreateLeafPart(signaler, mainType, subType, input);
-                case "multipart":
-                    return CreateMultipart(signaler, subType, input);
-                default:
-                    throw new ArgumentException($"I don't know how to handle the '{type}' MIME type.");
-            }
-        }
-
-        /*
          * Creates a leaf part, implying no MimePart children.
          */
         static MimePart CreateLeafPart(
@@ -89,12 +83,12 @@ namespace magic.lambda.mime.helpers
             Node messageNode)
         {
             // Retrieving [content] node.
-            var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content") ??
-                messageNode.Children.FirstOrDefault(x => x.Name == "filename") ??
+            var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content" || x.Name == "filename") ??
                 throw new ArgumentException("No [content] or [filename] provided for your entity");
 
             var result = new MimePart(ContentType.Parse(mainType + "/" + subType));
             DecorateEntityHeaders(result, messageNode);
+
             switch (contentNode.Name)
             {
                 case "content":
@@ -118,9 +112,10 @@ namespace magic.lambda.mime.helpers
         {
             var result = new Multipart(subType);
             DecorateEntityHeaders(result, messageNode);
+
             foreach (var idxPart in messageNode.Children.Where(x => x.Name == "entity"))
             {
-                result.Add(CreateEntity(signaler, idxPart));
+                result.Add(Create(signaler, idxPart));
             }
             return result;
         }
@@ -187,7 +182,8 @@ namespace magic.lambda.mime.helpers
             var headerNode = messageNode.Children.FirstOrDefault(x => x.Name == "headers");
             if (headerNode == null)
                 return; // No headers
-            foreach (var idx in headerNode.Children.Where(ix => ix.Name != "Content-Type" && ix.Name != "content"))
+
+            foreach (var idx in headerNode.Children.Where(ix => ix.Name != "Content-Type"))
             {
                 entity.Headers.Replace(idx.Name, idx.GetEx<string>());
             }

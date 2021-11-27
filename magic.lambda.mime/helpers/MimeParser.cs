@@ -22,32 +22,6 @@ namespace magic.lambda.mime.helpers
         /// <param name="entity">MimeEntity to parse.</param>
         public static void Parse(Node node, MimeEntity entity)
         {
-            ParseImplementation(node, entity);
-        }
-
-        /// <summary>
-        /// Helper method to dispose a MimeEntity's streams.
-        /// </summary>
-        /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
-        public static void DisposeEntity(MimeEntity entity)
-        {
-            if (entity is MimePart part)
-            {
-                part.Content?.Stream?.Dispose();
-            }
-            else if (entity is Multipart multi)
-            {
-                foreach (var idx in multi)
-                {
-                    DisposeEntity(idx);
-                }
-            }
-        }
-
-        #region [ -- Private helper methods -- ]
-
-        static void ParseImplementation(Node node, MimeEntity entity)
-        {
             node.Value = entity.ContentType.MimeType;
             ProcessHeaders(node, entity);
 
@@ -57,7 +31,7 @@ namespace magic.lambda.mime.helpers
                 foreach (var idx in multi)
                 {
                     var idxNode = new Node("entity");
-                    ParseImplementation(idxNode, idx);
+                    Parse(idxNode, idx);
                     node.Add(idxNode);
                 }
             }
@@ -82,6 +56,27 @@ namespace magic.lambda.mime.helpers
                 }
             }
         }
+
+        /// <summary>
+        /// Helper method to dispose a MimeEntity's streams.
+        /// </summary>
+        /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
+        public static void DisposeEntity(MimeEntity entity)
+        {
+            if (entity is MimePart part)
+            {
+                part.Content?.Stream?.Dispose();
+            }
+            else if (entity is Multipart multi)
+            {
+                foreach (var idx in multi)
+                {
+                    DisposeEntity(idx);
+                }
+            }
+        }
+
+        #region [ -- Private helper methods -- ]
 
         /*
          * Process MIME entity's headers, and adds up into node collection.

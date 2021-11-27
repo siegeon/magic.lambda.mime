@@ -4,7 +4,6 @@
 
 using System.IO;
 using System.Text;
-using System.Linq;
 using MimeKit;
 using magic.node;
 using magic.node.extensions;
