@@ -174,6 +174,7 @@ foo bar", entity.ToString());
             var signaler = Common.GetSignaler();
             var node = new Node("", "text/plain");
             var content = new Node("filename", "/test.txt");
+            content.Add(new Node("Content-Encoding", "default"));
             node.Add(content);
             signaler.Signal(".mime.create", node);
             var entity = node.Value as MimeEntity;
@@ -187,6 +188,16 @@ foo bar", entity.ToString());
             {
                 Common.DisposeEntity(entity);
             }
+        }
+
+        [Fact]
+        public void CreateFromFilename_THROWS()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            var content = new Node("filename");
+            node.Add(content);
+            Assert.Throws<ArgumentException>(() => signaler.Signal(".mime.create", node));
         }
 
         [Fact]
