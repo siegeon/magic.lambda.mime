@@ -5,8 +5,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>magic.lambda.mime</PackageId>
     <Authors>Thomas Hansen</Authors>
-    <Company>Thomas Hansen</Company>
-    <Copyright>Thomas Hansen, thomas@servergardens.com</Copyright>
+    <Company>Aista, Ltd</Company>
+    <Copyright>Aista, Ltd, thomas@servergardens.com</Copyright>
     <Description>MIME helpers for Magic built on MimeKit, allowing you to easily construct and parse MIME messages. Combined with magic.lambda.mail, it also gives you sending and retrieving of emails capability. To use package go to https://polterguy.github.io</Description>
     <PackageProjectUrl>https://github.com/polterguy/magic.lambda.mime</PackageProjectUrl>
     <PackOnBuild>true</PackOnBuild>
@@ -14,7 +14,7 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/polterguy/magic.lambda.mime.git</RepositoryUrl>
-    <PackageTags>cryptography, hashing, sha256, sha384, sha512, md5, blowfish, passwords, storage</PackageTags>
+    <PackageTags>mime, internat, mail, email, parsing, hyperlambda</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
