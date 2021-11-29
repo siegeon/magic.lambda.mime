@@ -30,11 +30,11 @@ namespace magic.lambda.mime.helpers
             // Finding Content-Type of entity.
             var type = input.GetEx<string>();
             if (!type.Contains("/"))
-                throw new ArgumentException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
+                throw new HyperlambdaException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
 
             var tokens = type.Split('/');
             if (tokens.Length != 2)
-                throw new ArgumentException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
+                throw new HyperlambdaException($"'{type}' is an unknown MIME Content-Type. Please provide a valid MIME type as the value of your node.");
 
             var mainType = tokens[0];
             var subType = tokens[1];
@@ -48,7 +48,7 @@ namespace magic.lambda.mime.helpers
                     return CreateMultipart(signaler, subType, input);
 
                 default:
-                    throw new ArgumentException($"I don't know how to handle the '{type}' MIME type.");
+                    throw new HyperlambdaException($"I don't know how to handle the '{type}' MIME type.");
             }
         }
 
@@ -83,7 +83,7 @@ namespace magic.lambda.mime.helpers
         {
             // Retrieving [content] node.
             var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content" || x.Name == "filename") ??
-                throw new ArgumentException("No [content] or [filename] provided for your entity");
+                throw new HyperlambdaException("No [content] or [filename] provided for your entity");
 
             var result = new MimePart(ContentType.Parse(mainType + "/" + subType));
             DecorateEntityHeaders(result, messageNode);
@@ -126,7 +126,7 @@ namespace magic.lambda.mime.helpers
         {
             var stream = new MemoryBlockStream();
             var content = contentNode.GetEx<string>() ??
-                throw new ArgumentException("No actual [content] supplied to message");
+                throw new HyperlambdaException("No actual [content] supplied to message");
             var writer = new StreamWriter(stream);
             writer.Write(content);
             writer.Flush();
@@ -147,7 +147,7 @@ namespace magic.lambda.mime.helpers
             Node contentNode,
             MimePart part)
         {
-            var filename = contentNode.GetEx<string>() ?? throw new ArgumentException("No [filename] value provided");
+            var filename = contentNode.GetEx<string>() ?? throw new HyperlambdaException("No [filename] value provided");
 
             // Checking if explicit encoding was supplied.
             ContentEncoding encoding = ContentEncoding.Default;

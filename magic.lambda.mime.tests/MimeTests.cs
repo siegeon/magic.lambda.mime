@@ -197,7 +197,7 @@ foo bar", entity.ToString());
             var node = new Node("", "text/plain");
             var content = new Node("filename");
             node.Add(content);
-            Assert.Throws<ArgumentException>(() => signaler.Signal(".mime.create", node));
+            Assert.Throws<HyperlambdaException>(() => signaler.Signal(".mime.create", node));
         }
 
         [Fact]
@@ -207,7 +207,7 @@ foo bar", entity.ToString());
             var node = new Node("", "text-plain");
             var content = new Node("content", "foo bar");
             node.Add(content);
-            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+            Assert.Throws<HyperlambdaException>(() => signaler.Signal("mime.create", node));
         }
 
         [Fact]
@@ -217,7 +217,7 @@ foo bar", entity.ToString());
             var node = new Node("", "text/plain/foo");
             var content = new Node("content", "foo bar");
             node.Add(content);
-            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+            Assert.Throws<HyperlambdaException>(() => signaler.Signal("mime.create", node));
         }
 
         [Fact]
@@ -227,7 +227,7 @@ foo bar", entity.ToString());
             var node = new Node("", "APPLICATION/octet-stream");
             var content = new Node("content", "foo bar");
             node.Add(content);
-            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+            Assert.Throws<HyperlambdaException>(() => signaler.Signal("mime.create", node));
         }
 
         [Fact]
@@ -235,7 +235,7 @@ foo bar", entity.ToString());
         {
             var signaler = Common.GetSignaler();
             var node = new Node("", "text/plain");
-            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+            Assert.Throws<HyperlambdaException>(() => signaler.Signal("mime.create", node));
         }
 
         [Fact]
@@ -245,7 +245,7 @@ foo bar", entity.ToString());
             var node = new Node("", "text/plain");
             var content = new Node("content");
             node.Add(content);
-            Assert.Throws<ArgumentException>(() => signaler.Signal("mime.create", node));
+            Assert.Throws<HyperlambdaException>(() => signaler.Signal("mime.create", node));
         }
 
         [Fact]

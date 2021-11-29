@@ -19,6 +19,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="magic.lambda" Version="9.9.9" />
+    <PackageReference Include="magic.node.extensions" Version="9.9.9" />
     <PackageReference Include="magic.signals" Version="9.9.9" />
     <PackageReference Include="magic.signals.contracts" Version="9.9.9" />
     <PackageReference Include="magic.lambda.io" Version="9.9.9" />
