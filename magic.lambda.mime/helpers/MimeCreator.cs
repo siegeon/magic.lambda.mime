@@ -52,11 +52,10 @@ namespace magic.lambda.mime.helpers
             }
         }
 
-        /// <summary>
-        /// Helper method to dispose a MimeEntity's streams.
-        /// </summary>
-        /// <param name="entity">Entity to iterate over to dispose all associated streams.</param>
-        public static void DisposeEntity(MimeEntity entity)
+        /*
+         * Internal helper method to dispose all streams inside all entities.
+         */
+        internal static void DisposeEntity(MimeEntity entity)
         {
             if (entity is MimePart part)
             {
