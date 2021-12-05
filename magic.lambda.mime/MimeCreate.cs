@@ -2,7 +2,10 @@
  * Magic Cloud, copyright Aista, Ltd. See the attached LICENSE file for details.
  */
 
+using System.IO;
+using System.Linq;
 using magic.node;
+using magic.node.extensions;
 using magic.signals.contracts;
 using magic.lambda.mime.helpers;
 
@@ -21,14 +24,46 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
-            // Creating entity
+            // Figuring out if caller wants a structured result.
+            var structured = input.Children
+                .FirstOrDefault(x => x.Name == "structured")?
+                .GetEx<bool>() ?? false;
+
+            // Creating entity.
             var entity = MimeCreator.Create(signaler, input);
+
+            // House cleaning.
+            input.Value = null;
+            input.Clear();
+
+            // Ensuring we dispose all associated streams before returning to caller.
             try
             {
-                input.Value = entity.ToString();
+                // Serialising entity into temporary stream such that we can correctly return it to caller.
+                using (var stream = new MemoryStream())
+                {
+                    entity.WriteTo(stream, structured);
+                    stream.Position = 0;
+
+                    // Reading back entity's content again.
+                    using (var reader = new StreamReader(stream))
+                    {
+                        // Checking if caller wants a structured result or not.
+                        if (structured)
+                        {
+                            input.AddRange(entity.Headers.Select(x => new Node(x.Field, x.Value)));
+                            input.Add(new Node("content", reader.ReadToEnd()));
+                        }
+                        else
+                        {
+                            input.Value = reader.ReadToEnd();
+                        }
+                    }
+                }
             }
             finally
             {
+                // House cleaning to make sure we dispose all streams associated with entity.
                 MimeCreator.DisposeEntity(entity);
             }
         }

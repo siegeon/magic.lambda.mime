@@ -24,6 +24,7 @@ namespace magic.lambda.mime
         /// <param name="input">Arguments to your slot.</param>
         public void Signal(ISignaler signaler, Node input)
         {
+            // Creating entity and returning to caller as is.
             input.Value = MimeCreator.Create(signaler, input);
             input.Clear();
         }
