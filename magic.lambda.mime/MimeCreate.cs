@@ -36,7 +36,7 @@ namespace magic.lambda.mime
             input.Value = null;
             input.Clear();
 
-            // Ensuring we dispose all associated streams before returning to caller.
+            // Ensuring we dispose all streams associated with MIME entity before we return to caller.
             try
             {
                 // Serialising entity into temporary stream such that we can correctly return it to caller.
