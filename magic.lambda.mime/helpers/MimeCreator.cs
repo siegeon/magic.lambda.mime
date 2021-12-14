@@ -52,24 +52,6 @@ namespace magic.lambda.mime.helpers
             }
         }
 
-        /*
-         * Internal helper method to dispose all streams inside all entities.
-         */
-        internal static void DisposeEntity(MimeEntity entity)
-        {
-            if (entity is MimePart part)
-            {
-                part.Content?.Stream?.Dispose();
-            }
-            else if (entity is Multipart multi)
-            {
-                foreach (var idx in multi)
-                {
-                    DisposeEntity(idx);
-                }
-            }
-        }
-
         #region [ -- Private helper methods -- ]
 
         /*

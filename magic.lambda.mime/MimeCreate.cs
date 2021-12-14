@@ -30,15 +30,12 @@ namespace magic.lambda.mime
                 .GetEx<bool>() ?? false;
 
             // Creating entity.
-            var entity = MimeCreator.Create(signaler, input);
-
-            // House cleaning.
-            input.Value = null;
-            input.Clear();
-
-            // Ensuring we dispose all streams associated with MIME entity before we return to caller.
-            try
+            using (var entity = MimeCreator.Create(signaler, input))
             {
+                // House cleaning.
+                input.Value = null;
+                input.Clear();
+
                 // Serialising entity into temporary stream such that we can correctly return it to caller.
                 using (var stream = new MemoryStream())
                 {
@@ -60,11 +57,6 @@ namespace magic.lambda.mime
                         }
                     }
                 }
-            }
-            finally
-            {
-                // House cleaning to make sure we dispose all streams associated with entity.
-                MimeCreator.DisposeEntity(entity);
             }
         }
     }

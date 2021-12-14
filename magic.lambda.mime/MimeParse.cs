@@ -26,14 +26,9 @@ namespace magic.lambda.mime
         {
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(input.GetEx<string>())))
             {
-                var entity = MimeEntity.Load(stream);
-                try
+                using (var entity = MimeEntity.Load(stream))
                 {
                     helpers.MimeParser.Parse(input, entity);
-                }
-                finally
-                {
-                    helpers.MimeParser.DisposeEntity(entity);
                 }
             }
         }
