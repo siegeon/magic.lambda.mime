@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using MimeKit;
 using magic.node;
+using magic.node.services;
 using magic.node.contracts;
 using magic.signals.services;
 using magic.signals.contracts;
@@ -48,21 +49,6 @@ namespace magic.lambda.mime.tests
             return services.GetService(typeof(ISignaler)) as ISignaler;
         }
 
-        public static void DisposeEntity(MimeEntity entity)
-        {
-            if (entity is MimePart part)
-            {
-                part.Content?.Stream?.Dispose();
-            }
-            else if (entity is Multipart multi)
-            {
-                foreach (var idx in multi)
-                {
-                    DisposeEntity(idx);
-                }
-            }
-        }
-
         #region [ -- Private helper methods -- ]
 
         static IServiceProvider Initialize()
@@ -70,6 +56,7 @@ namespace magic.lambda.mime.tests
             var services = new ServiceCollection();
             services.AddTransient<ISignaler, Signaler>();
             services.AddTransient<IRootResolver, RootResolver>();
+            services.AddTransient<IStreamService, StreamService>();
             var types = new SignalsProvider(InstantiateAllTypes<ISlot>(services));
             services.AddTransient<ISignalsProvider>((svc) => types);
             var provider = services.BuildServiceProvider();
