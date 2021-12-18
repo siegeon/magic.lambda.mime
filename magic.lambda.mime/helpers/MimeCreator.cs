@@ -8,6 +8,7 @@ using System.Linq;
 using MimeKit;
 using MimeKit.IO;
 using magic.node;
+using magic.node.contracts;
 using magic.node.extensions;
 using magic.signals.contracts;
 
@@ -24,8 +25,14 @@ namespace magic.lambda.mime.helpers
         /// </summary>
         /// <param name="signaler">Signaler used to construct message.</param>
         /// <param name="input">Hierarchical node structure representing the MIME message in lambda format.</param>
+        /// <param name="streamService">Needed in case one of our MIME entities wants to read files from the file service.</param>
+        /// <param name="rootResolver">Needed to determine root folder for files.</param>
         /// <returns>A MIME entity object encapsulating the specified lambda object</returns>
-        public static MimeEntity Create(ISignaler signaler, Node input)
+        public static MimeEntity Create(
+            ISignaler signaler,
+            Node input,
+            IStreamService streamService,
+            IRootResolver rootResolver)
         {
             // Finding Content-Type of entity.
             var type = input.GetEx<string>();
@@ -42,10 +49,10 @@ namespace magic.lambda.mime.helpers
             {
                 case "application":
                 case "text":
-                    return CreateLeafPart(signaler, mainType, subType, input);
+                    return CreateLeafPart(signaler, mainType, subType, input, streamService, rootResolver);
 
                 case "multipart":
-                    return CreateMultipart(signaler, subType, input);
+                    return CreateMultipart(signaler, subType, input, streamService, rootResolver);
 
                 default:
                     throw new HyperlambdaException($"I don't know how to handle the '{type}' MIME type.");
@@ -61,7 +68,9 @@ namespace magic.lambda.mime.helpers
             ISignaler signaler,
             string mainType,
             string subType,
-            Node messageNode)
+            Node messageNode,
+            IStreamService streamService,
+            IRootResolver rootResolver)
         {
             // Retrieving [content] node.
             var contentNode = messageNode.Children.FirstOrDefault(x => x.Name == "content" || x.Name == "filename") ??
@@ -77,7 +86,7 @@ namespace magic.lambda.mime.helpers
                     break;
 
                 case "filename":
-                    CreateContentObjectFromFilename(signaler, contentNode, result);
+                    CreateContentObjectFromFilename(signaler, contentNode, result, streamService, rootResolver);
                     break;
             }
             return result;
@@ -89,14 +98,16 @@ namespace magic.lambda.mime.helpers
         static Multipart CreateMultipart(
             ISignaler signaler,
             string subType,
-            Node messageNode)
+            Node messageNode,
+            IStreamService streamService,
+            IRootResolver rootResolver)
         {
             var result = new Multipart(subType);
             DecorateEntityHeaders(result, messageNode);
 
             foreach (var idxPart in messageNode.Children.Where(x => x.Name == "entity"))
             {
-                result.Add(Create(signaler, idxPart));
+                result.Add(Create(signaler, idxPart, streamService, rootResolver));
             }
             return result;
         }
@@ -127,7 +138,9 @@ namespace magic.lambda.mime.helpers
         static void CreateContentObjectFromFilename(
             ISignaler signaler,
             Node contentNode,
-            MimePart part)
+            MimePart part,
+            IStreamService streamService,
+            IRootResolver rootResolver)
         {
             var filename = contentNode.GetEx<string>() ?? throw new HyperlambdaException("No [filename] value provided");
 
@@ -146,13 +159,10 @@ namespace magic.lambda.mime.helpers
                     FileName = Path.GetFileName(filename)
                 };
             }
-            var rootPath = new Node();
-            signaler.Signal(".io.folder.root", rootPath);
             part.Content = new MimeContent(
-                File.OpenRead(
-                    rootPath.GetEx<string>() +
-                    filename.TrimStart('/')),
-                encoding);
+                streamService.OpenFile(
+                    rootResolver.AbsolutePath(filename.TrimStart('/'))),
+                    encoding);
         }
 
         /*
