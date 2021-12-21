@@ -22,8 +22,14 @@ namespace magic.lambda.mime.tests
         private class RootResolver : IRootResolver
         {
             public string RootFolder => AppDomain.CurrentDomain.BaseDirectory;
+            public string AbsoluteRootFolder => AppDomain.CurrentDomain.BaseDirectory;
 
             public string AbsolutePath(string path)
+            {
+                return RootFolder + path.TrimStart(new char[] { '/', '\\' });
+            }
+
+            public string RootPath(string path)
             {
                 return RootFolder + path.TrimStart(new char[] { '/', '\\' });
             }
