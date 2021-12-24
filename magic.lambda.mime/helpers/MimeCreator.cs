@@ -49,7 +49,7 @@ namespace magic.lambda.mime.helpers
             {
                 case "application":
                 case "text":
-                    return CreateLeafPart(signaler, mainType, subType, input, streamService, rootResolver);
+                    return CreateLeafPart(mainType, subType, input, streamService, rootResolver);
 
                 case "multipart":
                     return CreateMultipart(signaler, subType, input, streamService, rootResolver);
@@ -65,7 +65,6 @@ namespace magic.lambda.mime.helpers
          * Creates a leaf part, implying no MimePart children.
          */
         static MimePart CreateLeafPart(
-            ISignaler signaler,
             string mainType,
             string subType,
             Node messageNode,
