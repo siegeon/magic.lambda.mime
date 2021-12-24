@@ -57,6 +57,20 @@ foo bar", node.Get<string>());
         }
 
         [Fact]
+        public void CreateSimpleStructuredMessage()
+        {
+            var signaler = Common.GetSignaler();
+            var node = new Node("", "text/plain");
+            node.Add(new Node("content", "foo bar"));
+            node.Add(new Node("structured", true));
+            signaler.Signal("mime.create", node);
+            Assert.Equal(@"text/plain", node.Children.First().Get<string>());
+            Assert.Equal(@"foo bar", node.Children.Skip(1).First().Get<string>());
+            Assert.Equal(@"Content-Type", node.Children.First().Name);
+            Assert.Equal(@"content", node.Children.Skip(1).First().Name);
+        }
+
+        [Fact]
         public void CreateMultipart()
         {
             var signaler = Common.GetSignaler();
