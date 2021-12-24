@@ -86,7 +86,7 @@ namespace magic.lambda.mime.helpers
                     break;
 
                 case "filename":
-                    CreateContentObjectFromFilename(signaler, contentNode, result, streamService, rootResolver);
+                    CreateContentObjectFromFilename(contentNode, result, streamService, rootResolver);
                     break;
             }
             return result;
@@ -136,7 +136,6 @@ namespace magic.lambda.mime.helpers
          * Creates ContentObject from filename.
          */
         static void CreateContentObjectFromFilename(
-            ISignaler signaler,
             Node contentNode,
             MimePart part,
             IStreamService streamService,
